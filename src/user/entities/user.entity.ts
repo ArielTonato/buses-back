@@ -1,4 +1,4 @@
-import { Roles } from "src/common/enums/roles.enum";
+import { Roles } from "../../common/enums/roles.enum";
 import { Column, DeleteDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
