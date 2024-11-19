@@ -6,4 +6,5 @@ export class CreateUserDto {
     @IsEcuadorianId({message:"La cedula ingresada no es valida"})
     identification: string;
 
+    
 }
