@@ -15,15 +15,22 @@ export class UserService {
   }
 
   create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+    return this.userRepository.save(createUserDto);
+  }
+
+  findByEmailWithPassword(email: string) {
+    return this.userRepository.findOne({
+      where: { correo: email },
+      select: ['usuario_id','correo', 'password', "primer_nombre", "primer_apellido", "rol"]
+    })
   }
 
   findAll() {
-    return `This action returns all user`;
+    return this.userRepository.find();
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} user`;
+    return this.userRepository.findOneBy({usuario_id: id});
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
