@@ -1,0 +1,14 @@
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+{
+    "identificacion":"0504375734",
+    "primer_nombre":"Juan",
+    "segundo_nombre":"Carlos",
+    "primer_apellido":"Perez",
+    "segundo_apellido":"Gomez",
+    "correo":"adfasdf@gg.com",
+    "password":"123456",
+    "telefono":"0988850126",
+    "direccion":"Calle 123"
+}

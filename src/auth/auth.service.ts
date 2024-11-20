@@ -28,7 +28,6 @@ export class AuthService {
         });
 
         return {
-            email: userRegister.correo,
             message: 'Usuario registrado correctamente'
         }
     }
