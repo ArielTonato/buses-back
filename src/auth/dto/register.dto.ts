@@ -7,7 +7,7 @@ import {
 } from "class-validator";
 import { IsEcuadorianId } from "../../common/decorators/cedula.validator";
 
-export class CreateUserDto {
+export class RegisterDto {
     @IsString()
     @IsEcuadorianId({ message: "La cédula ingresada no es válida" })
     identificacion: string;
