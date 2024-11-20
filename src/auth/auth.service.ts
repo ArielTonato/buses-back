@@ -12,8 +12,20 @@ export class AuthService {
         private readonly userService: UserService,
     ) {}
 
-    async login({email, password}: LoginDto){
-
+    async login({correo, password}: LoginDto){
+        const user = await this.userService.findByEmailWithPassword(correo);
+        if(!user){
+            throw new BadRequestException('Credenciales inválidas o usuario no encontrado');
+        }
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if(!isPasswordValid){
+            throw new BadRequestException('Credenciales inválidas o usuario no encontrado');
+        }
+        const payload = {correo: user.correo, rol: user.rol, primer_nombre: user.primer_nombre, primer_apellido: user.primer_apellido};
+        const token = this.jwtService.sign(payload);
+        return{
+            token
+        }
     }
 
     async register(userRegister: RegisterDto){
