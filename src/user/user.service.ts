@@ -3,7 +3,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 
 @Injectable()
 export class UserService {
@@ -36,6 +36,18 @@ export class UserService {
   findOne(id: number) {
     return this.userRepository.findOneBy({usuario_id: id});
   }
+
+
+  findOneByNameOrLastName(name: string) {
+    return this.userRepository.find({
+      where: [
+        { primer_nombre: Like(`%${name}%`) },
+        { segundo_nombre: Like(`%${name}%`) },
+        { primer_apellido: Like(`%${name}%`) },
+        { segundo_apellido: Like(`%${name}%`) }
+      ]
+    });
+}
 
   update(id: number, updateUserDto: UpdateUserDto) {
     return `This action updates a #${id} user`;
