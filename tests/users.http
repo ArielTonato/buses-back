@@ -18,6 +18,6 @@ Content-Type: application/json
     "segundo_apellido": "Machado",
     "correo": "cristina@edu.com",
     "telefono": "0988508826",
-    "rol": "administrador",
+    "rol": "usuario_normal",
     "direccion": "Calle 123"
   }
