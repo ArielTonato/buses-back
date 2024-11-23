@@ -1,2 +1,7 @@
 GET http://localhost:3000/api/user
 
+### Buscar Usuario por nombre
+GET http://localhost:3000/api/user/search/ma
+
+### Eliminar Usuario
+DELETE http://localhost:3000/api/user/9

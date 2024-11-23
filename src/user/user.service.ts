@@ -60,7 +60,13 @@ export class UserService {
     return `This action updates a #${id} user`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: number) {
+    const user = await this.userRepository.findOneBy({usuario_id: id});
+    if (!user) {
+      return {message: "El usuario no existe"};
+    }
+    //Nota: Cambiar a soft delete si se desea mantener el registro en la base de datos
+    await this.userRepository.delete({usuario_id: id});
+    return {message: "Usuario eliminado"};
   }
 }
