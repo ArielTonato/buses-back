@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -56,8 +56,10 @@ export class UserService {
     });
 }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: number, updateUserDto: UpdateUserDto) {
+    await this.validateUser(id,updateUserDto);
+    await this.userRepository.update({usuario_id: id}, updateUserDto);
+    return {message: "Usuario actualizado"};
   }
 
   async remove(id: number) {
@@ -68,5 +70,26 @@ export class UserService {
     //Nota: Cambiar a soft delete si se desea mantener el registro en la base de datos
     await this.userRepository.delete({usuario_id: id});
     return {message: "Usuario eliminado"};
+  }
+
+  async validateUser(id:number,user: UpdateUserDto){
+    const userE = await this.userRepository.findOneBy({usuario_id: id});
+    console.log(userE);
+    if (!userE) {
+      throw new BadRequestException('El usuario no existe');
+    }
+    const userExists = await this.findOneByEmail(user.correo);
+    if(userExists && userExists.usuario_id !== id){
+        throw new BadRequestException('Ya existe un usuario con ese correo');
+    }
+    const userExistsPhone = await this.findOneByCellPhone(user.telefono);
+    if(userExistsPhone && userExistsPhone.usuario_id !== id){
+        throw new BadRequestException('Ya existe un usuario con ese número de teléfono');
+    }
+    const userExistsCedula = await this.findOneByCedula(user.identificacion);
+    if(userExistsCedula && userExistsCedula.usuario_id !== id){
+        throw new BadRequestException('Ya existe un usuario con esa cédula');
+    }
+    return user;
   }
 }

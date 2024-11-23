@@ -5,3 +5,19 @@ GET http://localhost:3000/api/user/search/ma
 
 ### Eliminar Usuario
 DELETE http://localhost:3000/api/user/9
+
+### Actualizar Usuario
+PUT http://localhost:3000/api/user/10
+Content-Type: application/json
+
+  {
+    "identificacion": "1850509249",
+    "primer_nombre": "Cristina2",
+    "segundo_nombre": "Estefania2",
+    "primer_apellido": "Chacha2",
+    "segundo_apellido": "Machado2",
+    "correo": "cristina@edu.com",
+    "telefono": "0988508826",
+    "rol": "administrador",
+    "direccion": "Calle 123"
+  }
