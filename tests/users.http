@@ -12,10 +12,10 @@ Content-Type: application/json
 
   {
     "identificacion": "1850509249",
-    "primer_nombre": "Cristina2",
-    "segundo_nombre": "Estefania2",
-    "primer_apellido": "Chacha2",
-    "segundo_apellido": "Machado2",
+    "primer_nombre": "Cristina",
+    "segundo_nombre": "Estefania",
+    "primer_apellido": "Chacha",
+    "segundo_apellido": "Machado",
     "correo": "cristina@edu.com",
     "telefono": "0988508826",
     "rol": "administrador",
