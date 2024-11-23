@@ -21,7 +21,6 @@ export class RolesGuard implements CanActivate{
         if(user.rol === Roles.ADMINISTRADORES){
             return true;
         }
-        console.log(user.rol);
         if(user.rol !== rol){
             throw new ForbiddenException("No tienes permisos para realizar esta acción");
         }

@@ -47,7 +47,6 @@ export class AuthService {
         {correo: email}: ActiveUserInterface
     ){
         const {usuario_id, rol, correo, primer_nombre, primer_apellido} = await this.userService.findOneByEmail(email);
-        console.log(correo)
         return {
             usuario_id,
             rol,

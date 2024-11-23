@@ -74,7 +74,6 @@ export class UserService {
 
   async validateUser(id:number,user: UpdateUserDto){
     const userE = await this.userRepository.findOneBy({usuario_id: id});
-    console.log(userE);
     if (!userE) {
       throw new BadRequestException('El usuario no existe');
     }
