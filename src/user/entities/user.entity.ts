@@ -6,7 +6,7 @@ export class User {
     @PrimaryGeneratedColumn()
     usuario_id: number;
 
-    @Column()
+    @Column({unique: true})
     identificacion: string;
 
     @Column()
@@ -14,6 +14,7 @@ export class User {
 
     @Column()
     segundo_nombre: string;
+
 
     @Column()
     primer_apellido: string;
@@ -27,7 +28,7 @@ export class User {
     @Column({select:false})
     password: string;
 
-    @Column()
+    @Column({unique: true})
     telefono: string;
 
     @Column({type:"enum", default:Roles.USUARIOS_NORMAL, enum:Roles}) 

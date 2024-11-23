@@ -3,14 +3,14 @@ POST http://localhost:3000/api/auth/register
 Content-Type: application/json
 
 {
-    "identificacion":"0504375734",
-    "primer_nombre":"Juan",
-    "segundo_nombre":"Carlos",
-    "primer_apellido":"Perez",
-    "segundo_apellido":"Gomez",
-    "correo":"adfasdf@gg.com",
+    "identificacion":"1850509249",
+    "primer_nombre":"Cristina",
+    "segundo_nombre":"Estefania",
+    "primer_apellido":"Chacha",
+    "segundo_apellido":"Machado",
+    "correo":"cristina@edu.com",
     "password":"123456",
-    "telefono":"0988850126",
+    "telefono":"0988508826",
     "direccion":"Calle 123"
 }
 

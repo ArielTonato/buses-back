@@ -27,6 +27,7 @@ export class UserController {
     return this.userService.findOneByNameOrLastName(name);
   }
 
+
   @Patch(':id')
   update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.update(id, updateUserDto);

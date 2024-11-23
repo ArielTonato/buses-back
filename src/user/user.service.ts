@@ -37,6 +37,13 @@ export class UserService {
     return this.userRepository.findOneBy({usuario_id: id});
   }
 
+  findOneByCellPhone(phone: string) {
+    return this.userRepository.findOneBy({ telefono: phone });
+  }
+
+  findOneByCedula(cedula: string) {
+    return this.userRepository.findOneBy({ identificacion: cedula });
+  }
 
   findOneByNameOrLastName(name: string) {
     return this.userRepository.find({
