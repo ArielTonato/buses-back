@@ -1,15 +1,15 @@
-import { IsBoolean, IsNumber, IsString } from "class-validator";
+import {  IsNumber, IsString } from "class-validator";
 
 export class CreateBusDto {
     @IsNumber()
     numero_bus: number;
 
     @IsString()
+
     placa: string;
 
     @IsString()
     chasis: string;
-
 
     @IsString()
     carroceria: string;

@@ -1,0 +1,14 @@
+GET http://localhost:3000/api/buses
+
+### Crear un bus
+POST http://localhost:3000/api/buses
+Content-Type: application/json
+
+{
+    "numero_bus": 1,
+    "placa": "ABC123",
+    "chasis": "123456789",
+    "carroceria": "Sedan",
+    "total_asientos_normales": 40,
+    "total_asientos_vip": 10
+}

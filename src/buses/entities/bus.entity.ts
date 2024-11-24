@@ -12,7 +12,7 @@ export class Bus {
     placa: string;
 
     @Column()
-    chassis: string;
+    chasis: string;
 
     @Column()
     carroceria: string;

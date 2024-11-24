@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { ConflictException, Inject, Injectable } from '@nestjs/common';
 import { CreateBusDto } from './dto/create-bus.dto';
 import { UpdateBusDto } from './dto/update-bus.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -14,11 +14,19 @@ export class BusesService {
   ) {}
 
   create(createBusDto: CreateBusDto) {
+    const bus = this.findOneByPlaca(createBusDto.placa);
+    if (bus) {
+      throw new ConflictException('Bus already exists');
+    }
     return this.busRepository.save(createBusDto);
   }
 
   findAll() {
     return `This action returns all buses`;
+  }
+
+  findOneByPlaca(placa: string) {
+    return this.busRepository.findOneBy({placa});
   }
 
   findOne(id: number) {
