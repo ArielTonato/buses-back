@@ -9,6 +9,7 @@ export class BusesController {
 
   @Post()
   create(@Body() createBusDto: CreateBusDto) {
+    ///Cuando se haya creado el recurso buses_fotos este tambien debera traer un array cona las fotos
     return this.busesService.create(createBusDto);
   }
 

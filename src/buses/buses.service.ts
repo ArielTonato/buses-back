@@ -13,8 +13,8 @@ export class BusesService {
     private readonly busRepository: Repository<Bus>
   ) {}
 
-  create(createBusDto: CreateBusDto) {
-    const bus = this.findOneByPlaca(createBusDto.placa);
+  async create(createBusDto: CreateBusDto) {
+    const bus = await this.findOneByPlaca(createBusDto.placa);
     if (bus) {
       throw new ConflictException('Bus already exists');
     }
