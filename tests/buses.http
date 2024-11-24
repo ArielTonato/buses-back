@@ -30,5 +30,6 @@ Content-Type: application/json
     "chasis": "123456789",
     "carroceria": "Sedan2",
     "total_asientos_normales": 40,
-    "total_asientos_vip": 10
+    "total_asientos_vip": 10,
+    "activo": false
   }
