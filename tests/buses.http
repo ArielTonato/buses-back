@@ -1,14 +1,34 @@
 GET http://localhost:3000/api/buses
 
+
+###Buscar un bus por placa
+GET http://localhost:3000/api/buses/search/ABC-1224
 ### Crear un bus
 POST http://localhost:3000/api/buses
 Content-Type: application/json
 
 {
     "numero_bus": 1,
-    "placa": "ABC-1234",
-    "chasis": "123456789",
+    "placa": "ABC-1224",
+    "chasis": "Normal",
     "carroceria": "Sedan",
     "total_asientos_normales": 40,
     "total_asientos_vip": 10
 }
+
+###Eliminar un bus
+DELETE http://localhost:3000/api/buses/55
+
+
+###Actualizar un bus
+PUT http://localhost:3000/api/buses/2
+Content-Type: application/json
+
+  {
+    "numero_bus": 1,
+    "placa": "ABC-1234",
+    "chasis": "123456789",
+    "carroceria": "Sedan2",
+    "total_asientos_normales": 40,
+    "total_asientos_vip": 10
+  }
