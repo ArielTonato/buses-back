@@ -24,7 +24,7 @@ export class Bus {
     @Column()
     total_asientos_vip: number;
 
-    @Column()
+    @Column({default: true})
     activo: boolean;
 
     @DeleteDateColumn()
