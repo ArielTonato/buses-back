@@ -1,5 +1,5 @@
-import { Roles } from '../common/enums/roles.enum';
-import { User } from '../user/entities/user.entity';
+import { Roles } from '../enums/roles.enum';
+import { User } from '../../user/entities/user.entity';
 import { DataSource } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 

@@ -14,7 +14,7 @@ Content-Type: application/json
     "direccion":"Calle 123"
 }
 
-### Iniciar Sesion
+### Iniciar Sesion (administrador)
 POST http://localhost:3000/api/auth/login
 Content-Type: application/json
 
@@ -23,6 +23,25 @@ Content-Type: application/json
     "password":"123456"
 }
 
+### Iniciar Sesion (usuario buses)
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+    "correo":"bus@buses.com",
+    "password":"123456"
+}
+
+
+### Iniciar Sesion (usuario normal)
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+    "correo":"cliente@mail.com",
+    "password":"123456"
+}
+
 ### Perfil
 GET http://localhost:3000/api/auth/profile
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTAsImNvcnJlbyI6ImNyaXN0aW5hQGVkdS5jb20iLCJyb2wiOiJhZG1pbmlzdHJhZG9yIiwicHJpbWVyX25vbWJyZSI6IkNyaXN0aW5hIiwicHJpbWVyX2FwZWxsaWRvIjoiQ2hhY2hhIiwiaWF0IjoxNzMyNDA0MDQ5LCJleHAiOjE3MzI0OTA0NDl9.21YnC0ZYvATHzuxbkxwmdK5lcCwYDECJLWdix-dzGR4
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTgsImNvcnJlbyI6ImJ1c0BidXNlcy5jb20iLCJyb2wiOiJ1c3VhcmlvX2J1cyIsInByaW1lcl9ub21icmUiOiJVc3VhcmlvIiwicHJpbWVyX2FwZWxsaWRvIjoiR2VzdG9yIiwiaWF0IjoxNzMyNzQ5MzIxLCJleHAiOjE3MzI4MzU3MjF9.ZVWPvIgDZApGVdVzFzlt_4m_yLR4xkhUccoYUbxlLRU

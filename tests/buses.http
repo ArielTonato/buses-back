@@ -1,5 +1,5 @@
 GET http://localhost:3000/api/buses
-
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTgsImNvcnJlbyI6ImJ1c0BidXNlcy5jb20iLCJyb2wiOiJ1c3VhcmlvX2J1cyIsInByaW1lcl9ub21icmUiOiJVc3VhcmlvIiwicHJpbWVyX2FwZWxsaWRvIjoiR2VzdG9yIiwiaWF0IjoxNzMyNzQ5MzIxLCJleHAiOjE3MzI4MzU3MjF9.ZVWPvIgDZApGVdVzFzlt_4m_yLR4xkhUccoYUbxlLRU
 
 ###Buscar un bus por placa
 GET http://localhost:3000/api/buses/search/ABC-1224
@@ -9,7 +9,7 @@ Content-Type: application/json
 
 {
     "numero_bus": 1,
-    "placa": "ABC-1224",
+    "placa": "ABC-1223",
     "chasis": "Normal",
     "carroceria": "Sedan",
     "total_asientos_normales": 40,
@@ -17,7 +17,7 @@ Content-Type: application/json
 }
 
 ###Eliminar un bus
-DELETE http://localhost:3000/api/buses/55
+DELETE http://localhost:3000/api/buses/4
 
 
 ###Actualizar un bus

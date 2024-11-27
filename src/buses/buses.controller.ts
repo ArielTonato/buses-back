@@ -2,7 +2,11 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Put } from '@nestjs/
 import { BusesService } from './buses.service';
 import { CreateBusDto } from './dto/create-bus.dto';
 import { UpdateBusDto } from './dto/update-bus.dto';
+import { Auth } from 'src/auth/decorators/auth.decorator';
+import { Roles } from 'src/common/enums/roles.enum';
 
+
+@Auth(Roles.USUARIOS_BUSES)
 @Controller('buses')
 export class BusesController {
   constructor(private readonly busesService: BusesService) {}

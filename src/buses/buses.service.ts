@@ -16,7 +16,7 @@ export class BusesService {
   async create(createBusDto: CreateBusDto) {
     const bus = await this.findOneByPlaca(createBusDto.placa);
     if (bus) {
-      throw new ConflictException('Bus already exists');
+      throw new ConflictException('ya existe un bus con esa placa');
     }
     return this.busRepository.save(createBusDto);
   }
