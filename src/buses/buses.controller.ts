@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Put, UseInterceptors, UploadedFiles } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Put, UseInterceptors, UploadedFiles, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, BadRequestException } from '@nestjs/common';
 import { BusesService } from './buses.service';
 import { CreateBusDto } from './dto/create-bus.dto';
 import { UpdateBusDto } from './dto/update-bus.dto';
@@ -16,7 +16,19 @@ export class BusesController {
   @UseInterceptors(FilesInterceptor('files', 10))
   create(
     @Body() createBusDto: CreateBusDto,
-    @UploadedFiles() files?: Express.Multer.File[]
+    @UploadedFiles(
+      new ParseFilePipe(
+        {
+          validators:[
+            new MaxFileSizeValidator({maxSize: 1024 * 1024 * 5}),
+            new FileTypeValidator({fileType: '.(jpg|jpeg|png)'})
+          ],
+          exceptionFactory: () => {
+            throw new BadRequestException('El archivo debe ser una imagen en formato jpg, jpeg o png');
+          }
+        }
+      )
+    ) files?: Express.Multer.File[]
   ) {
     return this.busesService.create(createBusDto, files);
   }
