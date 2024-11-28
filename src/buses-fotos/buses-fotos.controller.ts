@@ -1,17 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFiles, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator } from '@nestjs/common';
 import { BusesFotosService } from './buses-fotos.service';
 import { CreateBusesFotoDto } from './dto/create-buses-foto.dto';
 import { UpdateBusesFotoDto } from './dto/update-buses-foto.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
 
 @Controller('buses-fotos')
 export class BusesFotosController {
   constructor(private readonly busesFotosService: BusesFotosService) {}
 
   @Post('upload')
-  @UseInterceptors(FileInterceptor('file'))
-  uploadImage(
-    @UploadedFile(
+  @UseInterceptors(FilesInterceptor('files', 10)) // Permite hasta 10 archivos
+  async uploadImages(
+    @UploadedFiles(
       new ParseFilePipe(
         {
           validators:[
@@ -20,10 +20,9 @@ export class BusesFotosController {
           ]
         }
       )
-    ) file: Express.Multer.File
+    ) files: Array<Express.Multer.File>
   ){
-    console.log(file);
-    return this.busesFotosService.uploadImage(file);
+    return this.busesFotosService.uploadImages(files);
   }
 
   @Get()

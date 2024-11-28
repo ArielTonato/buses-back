@@ -10,10 +10,10 @@ export class BusesFotosService {
     private readonly cloudinaryService: CloudinaryService
   ) {}
 
-  uploadImage(
-    file: Express.Multer.File
-  ) {
-    return this.cloudinaryService.upload(file);
+  async uploadImages(files: Array<Express.Multer.File>) {
+    const uploadPromises = files.map(file => this.cloudinaryService.upload(file));
+    const results = await Promise.all(uploadPromises);
+    return results;
   }
 
   findAll() {
