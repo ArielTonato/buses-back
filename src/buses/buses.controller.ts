@@ -1,20 +1,24 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Put, UseInterceptors, UploadedFiles } from '@nestjs/common';
 import { BusesService } from './buses.service';
 import { CreateBusDto } from './dto/create-bus.dto';
 import { UpdateBusDto } from './dto/update-bus.dto';
 import { Auth } from 'src/auth/decorators/auth.decorator';
 import { Roles } from 'src/common/enums/roles.enum';
+import { FilesInterceptor } from '@nestjs/platform-express';
 
 
-@Auth(Roles.USUARIOS_BUSES)
+// @Auth(Roles.USUARIOS_BUSES)
 @Controller('buses')
 export class BusesController {
   constructor(private readonly busesService: BusesService) {}
 
   @Post()
-  create(@Body() createBusDto: CreateBusDto) {
-    ///Cuando se haya creado el recurso buses_fotos este tambien debera traer un array cona las fotos
-    return this.busesService.create(createBusDto);
+  @UseInterceptors(FilesInterceptor('files', 10))
+  create(
+    @Body() createBusDto: CreateBusDto,
+    @UploadedFiles() files?: Express.Multer.File[]
+  ) {
+    return this.busesService.create(createBusDto, files);
   }
 
   @Get()

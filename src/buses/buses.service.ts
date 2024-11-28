@@ -4,21 +4,47 @@ import { UpdateBusDto } from './dto/update-bus.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Bus } from './entities/bus.entity';
 import { Repository } from 'typeorm';
+import { BusesFoto } from 'src/buses-fotos/entities/buses-foto.entity';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
 @Injectable()
 export class BusesService {
   
   constructor(
     @InjectRepository(Bus)
-    private readonly busRepository: Repository<Bus>
+    private readonly busRepository: Repository<Bus>,
+    @InjectRepository(BusesFoto)
+    private readonly busesFotoRepository: Repository<BusesFoto>,
+    private readonly cloudinaryService: CloudinaryService
   ) {}
 
-  async create(createBusDto: CreateBusDto) {
+  async create(createBusDto: CreateBusDto, files?: Express.Multer.File[]) {
     const bus = await this.findOneByPlaca(createBusDto.placa);
     if (bus) {
-      throw new ConflictException('ya existe un bus con esa placa');
+      throw new ConflictException('Ya existe un bus con esa placa');
     }
-    return this.busRepository.save(createBusDto);
+
+    // Crear el bus
+    const newBus = await this.busRepository.save(createBusDto);
+
+    // Si hay archivos, subirlos a Cloudinary y crear los registros de fotos
+    if (files && files.length > 0) {
+      const uploadPromises = files.map(file => this.cloudinaryService.upload(file));
+      const uploadResults = await Promise.all(uploadPromises);
+
+      const fotosPromises = uploadResults.map(result => 
+        this.busesFotoRepository.save({
+          url: result.secure_url,
+          public_id: result.public_id,
+          bus_id: newBus.bus_id
+        })
+      );
+
+      await Promise.all(fotosPromises);
+    }
+
+    // Retornar el bus con sus fotos
+    return this.findOne(newBus.bus_id);
   }
 
   findAll() {

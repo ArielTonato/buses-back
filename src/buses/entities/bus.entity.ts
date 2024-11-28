@@ -1,4 +1,5 @@
-import { Column, DeleteDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { BusesFoto } from "src/buses-fotos/entities/buses-foto.entity";
 
 @Entity()
 export class Bus {
@@ -17,20 +18,15 @@ export class Bus {
     @Column()
     carroceria: string;
 
-
     @Column()
     total_asientos_normales: number;
 
     @Column()
     total_asientos_vip: number;
 
-    @Column({default: true})
-    activo: boolean;
-
     @DeleteDateColumn()
-    fecha_eliminacion: Date;
+    deletedAt: Date;
 
-    //La fecha de creacion es un timestamp que se genera automaticamente
-    @Column({type:"timestamp", default: () => "CURRENT_TIMESTAMP"})
-    fecha_creacion: Date;
+    @OneToMany(() => BusesFoto, busFoto => busFoto.bus, { cascade: true })
+    fotos: BusesFoto[];
 }
