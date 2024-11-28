@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { BusesModule } from './buses/buses.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { ConfigModule } from '@nestjs/config';
+import { BusesFotosModule } from './buses-fotos/buses-fotos.module';
 
 @Module({
   imports: [
@@ -27,7 +28,8 @@ import { ConfigModule } from '@nestjs/config';
     UserModule,
     AuthModule,
     BusesModule,
-    CloudinaryModule
+    CloudinaryModule,
+    BusesFotosModule
   ],
   controllers: [],
   providers: [],
