@@ -1,20 +1,36 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Put, UseInterceptors, UploadedFiles, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, BadRequestException } from '@nestjs/common';
 import { BusesService } from './buses.service';
 import { CreateBusDto } from './dto/create-bus.dto';
 import { UpdateBusDto } from './dto/update-bus.dto';
 import { Auth } from 'src/auth/decorators/auth.decorator';
 import { Roles } from 'src/common/enums/roles.enum';
+import { FilesInterceptor } from '@nestjs/platform-express';
 
 
-@Auth(Roles.USUARIOS_BUSES)
+// @Auth(Roles.USUARIOS_BUSES)
 @Controller('buses')
 export class BusesController {
   constructor(private readonly busesService: BusesService) {}
 
   @Post()
-  create(@Body() createBusDto: CreateBusDto) {
-    ///Cuando se haya creado el recurso buses_fotos este tambien debera traer un array cona las fotos
-    return this.busesService.create(createBusDto);
+  @UseInterceptors(FilesInterceptor('files', 10))
+  create(
+    @Body() createBusDto: CreateBusDto,
+    @UploadedFiles(
+      new ParseFilePipe(
+        {
+          validators:[
+            new MaxFileSizeValidator({maxSize: 1024 * 1024 * 5}),
+            new FileTypeValidator({fileType: '.(jpg|jpeg|png)'})
+          ],
+          exceptionFactory: () => {
+            throw new BadRequestException('El archivo debe ser una imagen en formato jpg, jpeg o png');
+          }
+        }
+      )
+    ) files?: Express.Multer.File[]
+  ) {
+    return this.busesService.create(createBusDto, files);
   }
 
   @Get()
@@ -29,7 +45,7 @@ export class BusesController {
 
   @Get('search/:placa')
   findOneByPlaca(@Param('placa') placa: string) {
-    return this.busesService.findOneByPlaca(placa);
+    return this.busesService.findOneByPlacaNoValidation(placa);
   }
 
   @Put(':id')
