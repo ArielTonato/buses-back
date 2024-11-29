@@ -27,6 +27,9 @@ export class Bus {
     @DeleteDateColumn()
     deletedAt: Date;
 
+    @Column({default: true})
+    activo: boolean;
+
     @OneToMany(() => BusesFoto, busFoto => busFoto.bus, { 
         eager: true,
         cascade: true 

@@ -2,7 +2,7 @@ GET http://localhost:3000/api/buses
 
 
 ###Buscar un bus por placa
-GET http://localhost:3000/api/buses/search/ABC-12123
+GET http://localhost:3000/api/buses/search/ABC-1123
 ### Crear un bus
 POST http://localhost:3000/api/buses
 Content-Type: application/json
@@ -17,19 +17,19 @@ Content-Type: application/json
 }
 
 ###Eliminar un bus
-DELETE http://localhost:3000/api/buses/4
+DELETE http://localhost:3000/api/buses/8
 
 
 ###Actualizar un bus
-PUT http://localhost:3000/api/buses/2
+PUT http://localhost:3000/api/buses/8
 Content-Type: application/json
 
   {
     "numero_bus": 1,
     "placa": "ABC-1234",
-    "chasis": "123456789",
+    "chasis": "miperro",
     "carroceria": "Sedan2",
     "total_asientos_normales": 40,
     "total_asientos_vip": 10,
-    "activo": false
+    "activo": true
   }
