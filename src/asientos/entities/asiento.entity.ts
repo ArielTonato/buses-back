@@ -21,4 +21,7 @@ export class Asiento {
 
     @Column({type:"timestamp", default: () => "CURRENT_TIMESTAMP", onUpdate: "CURRENT_TIMESTAMP"})
     fecha_creacion: Date;
+
+    @ManyToOne(() => Bus, bus => bus.asientos)
+    bus: Bus;
 }
