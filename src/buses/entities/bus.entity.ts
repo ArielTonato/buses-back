@@ -27,6 +27,9 @@ export class Bus {
     @DeleteDateColumn()
     deletedAt: Date;
 
-    @OneToMany(() => BusesFoto, busFoto => busFoto.bus, { cascade: true })
+    @OneToMany(() => BusesFoto, busFoto => busFoto.bus, { 
+        eager: true,
+        cascade: true 
+    })
     fotos: BusesFoto[];
 }

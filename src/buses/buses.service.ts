@@ -48,15 +48,42 @@ export class BusesService {
   }
 
   findAll() {
-    return this.busRepository.find();
+    return this.busRepository.find({
+      relations:{
+        fotos: true
+      }
+    });
   }
 
-  findOneByPlaca(placa: string) {
-    return this.busRepository.findOneBy({placa});
+   findOneByPlaca(placa: string) {
+    return this.busRepository.findOne({
+      where: { placa },
+      relations: {
+        fotos: true
+      }
+    });
+  }
+
+  async findOneByPlacaNoValidation(placa: string) {
+    const bus = await this.busRepository.findOne({
+      where: { placa },
+      relations: {
+        fotos: true
+      }
+    });
+    if (!bus) {
+      throw new ConflictException('El bus no existe');
+    }
+    return bus;
   }
 
   findOne(id: number) {
-    return this.busRepository.findOneBy({bus_id: id});
+    return this.busRepository.findOne({
+      where: { bus_id: id },
+      relations: {
+        fotos: true
+      }
+    });
   }
 
   async update(id: number, updateBusDto: UpdateBusDto) {

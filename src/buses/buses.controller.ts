@@ -45,7 +45,7 @@ export class BusesController {
 
   @Get('search/:placa')
   findOneByPlaca(@Param('placa') placa: string) {
-    return this.busesService.findOneByPlaca(placa);
+    return this.busesService.findOneByPlacaNoValidation(placa);
   }
 
   @Put(':id')
