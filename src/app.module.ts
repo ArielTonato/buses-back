@@ -2,7 +2,10 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
-
+import { BusesModule } from './buses/buses.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { ConfigModule } from '@nestjs/config';
+import { BusesFotosModule } from './buses-fotos/buses-fotos.module';
 
 @Module({
   imports: [
@@ -16,8 +19,17 @@ import { AuthModule } from './auth/auth.module';
       autoLoadEntities: true,
       synchronize: true,
     }),
+    ConfigModule.forRoot(
+      {
+        isGlobal: true,
+        
+      }
+    ),
     UserModule,
-    AuthModule
+    AuthModule,
+    BusesModule,
+    CloudinaryModule,
+    BusesFotosModule
   ],
   controllers: [],
   providers: [],
