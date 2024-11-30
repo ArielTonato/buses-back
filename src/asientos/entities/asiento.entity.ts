@@ -13,15 +13,10 @@ export class Asiento {
     @Column()
     numero_asiento: number;
 
-    @Column()
-    precio_base: number;
-
-    @Column({default: true})
-    activo: boolean;
 
     @Column({type:"timestamp", default: () => "CURRENT_TIMESTAMP", onUpdate: "CURRENT_TIMESTAMP"})
     fecha_creacion: Date;
 
-    @ManyToOne(() => Bus, bus => bus.asientos)
+    @ManyToOne(() => Bus, bus => bus.asientos, { onDelete: 'CASCADE' })
     bus: Bus;
 }
