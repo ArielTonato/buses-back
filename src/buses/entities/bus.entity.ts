@@ -1,5 +1,6 @@
 import { Column, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { BusesFoto } from "src/buses-fotos/entities/buses-foto.entity";
+import { Asiento } from "src/asientos/entities/asiento.entity";
 
 @Entity()
 export class Bus {
@@ -35,4 +36,7 @@ export class Bus {
         cascade: true 
     })
     fotos: BusesFoto[];
+
+    @OneToMany(() => Asiento, asiento => asiento.bus)
+    asientos: Asiento[];
 }

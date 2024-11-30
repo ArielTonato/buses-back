@@ -5,6 +5,7 @@ import { UpdateBusDto } from './dto/update-bus.dto';
 import { Auth } from 'src/auth/decorators/auth.decorator';
 import { Roles } from 'src/common/enums/roles.enum';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { error } from 'console';
 
 
 // @Auth(Roles.USUARIOS_BUSES)
@@ -20,10 +21,13 @@ export class BusesController {
       new ParseFilePipe(
         {
           validators:[
-            new MaxFileSizeValidator({maxSize: 1024 * 1024 * 5}),
+            new MaxFileSizeValidator({maxSize: 1024 * 1024 * 8}),
             new FileTypeValidator({fileType: '.(jpg|jpeg|png)'})
           ],
-          exceptionFactory: () => {
+          exceptionFactory: (errors) => {
+            if (errors === "File is required") {
+              throw new BadRequestException('Se necesita al menos una imagen del bus');
+            }
             throw new BadRequestException('El archivo debe ser una imagen en formato jpg, jpeg o png');
           }
         }

@@ -3,15 +3,17 @@ import { BusesService } from './buses.service';
 import { BusesController } from './buses.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Bus } from './entities/bus.entity';
-import { BusesFotosModule } from '../buses-fotos/buses-fotos.module';
-import { BusesFoto } from '../buses-fotos/entities/buses-foto.entity';
+import { BusesFoto } from 'src/buses-fotos/entities/buses-foto.entity';
+import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
+import { Asiento } from 'src/asientos/entities/asiento.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Bus, BusesFoto]),
-    BusesFotosModule
+    TypeOrmModule.forFeature([Bus, BusesFoto, Asiento]),
+    CloudinaryModule
   ],
   controllers: [BusesController],
-  providers: [BusesService]
+  providers: [BusesService],
+  exports: [BusesService]
 })
 export class BusesModule {}
