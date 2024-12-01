@@ -9,6 +9,7 @@ import { BusesFotosModule } from './buses-fotos/buses-fotos.module';
 import { AsientosModule } from './asientos/asientos.module';
 import { FrecuenciasModule } from './frecuencias/frecuencias.module';
 import { ParadasModule } from './paradas/paradas.module';
+import { RutasModule } from './rutas/rutas.module';
 
 @Module({
   imports: [
@@ -35,7 +36,8 @@ import { ParadasModule } from './paradas/paradas.module';
     BusesFotosModule,
     AsientosModule,
     FrecuenciasModule,
-    ParadasModule
+    ParadasModule,
+    RutasModule
   ],
   controllers: [],
   providers: [],
