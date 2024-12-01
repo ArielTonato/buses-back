@@ -45,6 +45,9 @@ export class Frecuencia {
   @Column()
   provincia: string;
 
+  @Column("float")
+  total: number;
+
   @CreateDateColumn()
   fecha_creacion: Date;
 }
