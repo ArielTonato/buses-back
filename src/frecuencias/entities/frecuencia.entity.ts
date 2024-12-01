@@ -42,6 +42,9 @@ export class Frecuencia {
   @Column({default: true})
   activo: boolean;
 
+  @Column()
+  provincia: string;
+
   @CreateDateColumn()
   fecha_creacion: Date;
 }

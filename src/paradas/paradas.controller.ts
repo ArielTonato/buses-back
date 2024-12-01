@@ -22,6 +22,16 @@ export class ParadasController {
     return this.paradasService.findOne(+id);
   }
 
+  @Get('ciudad/:ciudad')
+  findByCiudad(@Param('ciudad') ciudad: string) {
+    return this.paradasService.findByCiudad(ciudad);
+  }
+
+  @Get('buscar/:ciudad')
+  findByLikeCiudad(@Param('ciudad') ciudad: string) {
+    return this.paradasService.findByLikeCiudad(ciudad);
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateParadaDto: UpdateParadaDto) {
     return this.paradasService.update(+id, updateParadaDto);

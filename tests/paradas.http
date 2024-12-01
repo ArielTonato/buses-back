@@ -1,0 +1,24 @@
+###Obtener todas las paradas
+GET http://localhost:3000/api/paradas
+
+
+###Buscar parada por ciudad
+GET http://localhost:3000/api/paradas/ciudad/Santo Domingo
+
+
+###Buscar parada por like ciudad
+GET http://localhost:3000/api/paradas/buscar/gu
+
+###
+POST http://localhost:3000/api/paradas
+Content-Type: application/json
+
+{
+    "ciudad": "AmBato",
+    "orden": 1,
+    "distancia_km": 1,
+    "tiempo_estimado": "00:00:00",
+    "precio_base": 1
+}
+
+    

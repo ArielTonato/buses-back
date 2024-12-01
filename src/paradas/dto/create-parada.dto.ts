@@ -1,14 +1,15 @@
 import { IsBoolean, IsNumber, IsOptional, IsString, Matches } from "class-validator";
 import { Type } from "class-transformer";
+import { Capitalize } from "src/common/decorators/capitalize.decorator";
 
 export class CreateParadaDto {
-    @IsNumber({}, {message: "El id de la parada debe ser un número"})
+    @IsNumber({}, {message: "La frecuencia de la parada debe ser un número"})
     @Type(() => Number)
-    frecuencia_id: number;
-
+    frecuencia_id?: number;
 
     @IsString({message: "La ciudad debe ser una cadena de texto"})
-    @Matches(/^[a-zA-Z\s]+$/, { message: 'La ciudad no puede contener números' })
+    @Matches(/^(?!\s*$)[a-zA-Z\s]+$/, { message: 'La ciudad no puede contener solo espacios ni números' })
+    @Capitalize()
     ciudad: string;
 
     @IsNumber({}, {message: "El orden debe ser un número"})
@@ -25,7 +26,6 @@ export class CreateParadaDto {
     @IsNumber({}, {message: "El precio debe ser un número"})
     @Type(() => Number)
     precio_base: number;
-
 
     @IsBoolean({message: "El estado debe ser verdadero o falso"})
     @IsOptional()
