@@ -23,6 +23,6 @@ export class Parada {
   @Column('float')
   precio_base: number;
 
-  @Column()
+  @Column({default: true})
   activo: boolean;
 }
