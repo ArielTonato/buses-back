@@ -13,7 +13,7 @@ export class ParadasService {
   ) {}
 
   async create(createParadaDto: CreateParadaDto) {
-    const parada = await this.findByCiudad(createParadaDto.ciudad);
+    const parada = await this.findByCiudadNoRestrict(createParadaDto.ciudad);
     if (parada) {
       throw new BadRequestException('La parada ya existe');
     }
@@ -26,8 +26,16 @@ export class ParadasService {
     return this.paradaRepository.find();
   }
 
-  findByCiudad(ciudad: string) {
-    return this.paradaRepository.findOneBy({ciudad: ciudad});
+  findByCiudadNoRestrict(ciudad: string) {
+    return this.paradaRepository.findOneBy({ ciudad });
+  }
+
+  async findByCiudad(ciudad: string) {
+    const parada = await this.findByCiudadNoRestrict(ciudad);
+    if (!parada) {
+      throw new BadRequestException('La parada no existe');
+    }
+    return parada;
   }
 
   findByLikeCiudad(ciudad: string) {

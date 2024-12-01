@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
 
 @Entity('paradas')
 export class Parada {
@@ -6,23 +6,11 @@ export class Parada {
   parada_id: number;
 
   @Column()
-  frecuencia_id: number;
-
-  @Column()
   ciudad: string;
-
-  @Column()
-  orden: number;
-
-  @Column('float')
-  distancia_km: number;
-
-  @Column('time')
-  tiempo_estimado: string;
-
-  @Column('float')
-  precio_base: number;
 
   @Column({default: true})
   activo: boolean;
+
+  @CreateDateColumn()
+  fecha_creacion: Date;
 }

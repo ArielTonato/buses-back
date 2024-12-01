@@ -3,29 +3,13 @@ import { Type } from "class-transformer";
 import { Capitalize } from "src/common/decorators/capitalize.decorator";
 
 export class CreateParadaDto {
-    @IsNumber({}, {message: "La frecuencia de la parada debe ser un número"})
-    @Type(() => Number)
-    frecuencia_id?: number;
+
 
     @IsString({message: "La ciudad debe ser una cadena de texto"})
     @Matches(/^(?!\s*$)[a-zA-Z\s]+$/, { message: 'La ciudad no puede contener solo espacios ni números' })
     @Capitalize()
     ciudad: string;
 
-    @IsNumber({}, {message: "El orden debe ser un número"})
-    @Type(() => Number)
-    orden: number;
-
-    @IsNumber({}, {message: "La distancia debe ser un número"})
-    @Type(() => Number)
-    distancia_km: number;
-
-    @IsString({message: "El tiempo estimado debe ser una cadena de texto"})
-    tiempo_estimado: string;
-
-    @IsNumber({}, {message: "El precio debe ser un número"})
-    @Type(() => Number)
-    precio_base: number;
 
     @IsBoolean({message: "El estado debe ser verdadero o falso"})
     @IsOptional()

@@ -14,11 +14,7 @@ POST http://localhost:3000/api/paradas
 Content-Type: application/json
 
 {
-    "ciudad": "AmBato",
-    "orden": 1,
-    "distancia_km": 1,
-    "tiempo_estimado": "00:00:00",
-    "precio_base": 1
+    "ciudad": "guAno"
 }
 
     
