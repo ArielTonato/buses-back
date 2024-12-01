@@ -1,6 +1,7 @@
 import { Column, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { BusesFoto } from "src/buses-fotos/entities/buses-foto.entity";
 import { Asiento } from "src/asientos/entities/asiento.entity";
+import { Frecuencia } from '../../frecuencias/entities/frecuencia.entity';
 
 @Entity()
 export class Bus {
@@ -39,4 +40,7 @@ export class Bus {
 
     @OneToMany(() => Asiento, asiento => asiento.bus)
     asientos: Asiento[];
+
+    @OneToMany(() => Frecuencia, frecuencia => frecuencia.bus)
+    frecuencias: Frecuencia[];
 }

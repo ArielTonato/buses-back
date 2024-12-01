@@ -1,5 +1,6 @@
 import { Roles } from "../../common/enums/roles.enum";
-import { Column, DeleteDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Frecuencia } from "../../frecuencias/entities/frecuencia.entity";
 
 @Entity()
 export class User {
@@ -36,6 +37,9 @@ export class User {
 
     @Column()
     direccion: string;
+
+    @OneToMany(() => Frecuencia, frecuencia => frecuencia.conductor)
+    frecuencias_conductor: Frecuencia[];
 
     @DeleteDateColumn()
     fecha_eliminacion: Date;
