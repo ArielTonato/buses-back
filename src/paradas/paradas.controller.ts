@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Put } from '@nestjs/common';
 import { ParadasService } from './paradas.service';
 import { CreateParadaDto } from './dto/create-parada.dto';
 import { UpdateParadaDto } from './dto/update-parada.dto';
@@ -32,7 +32,7 @@ export class ParadasController {
     return this.paradasService.findByLikeCiudad(ciudad);
   }
 
-  @Patch(':id')
+  @Put(':id')
   update(@Param('id') id: string, @Body() updateParadaDto: UpdateParadaDto) {
     return this.paradasService.update(+id, updateParadaDto);
   }

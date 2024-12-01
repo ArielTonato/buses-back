@@ -50,11 +50,25 @@ export class ParadasService {
     return this.paradaRepository.findOneBy({parada_id: id});
   }
 
-  update(id: number, updateParadaDto: UpdateParadaDto) {
-    return `This action updates a #${id} parada`;
+ async update(id: number, updateParadaDto: UpdateParadaDto) {
+    const parada = await this.findOne(id);
+    if (!parada) {
+      throw new BadRequestException('La parada no existe');
+    }
+    const paradaExists = await this.findByCiudadNoRestrict(updateParadaDto.ciudad);
+    if (paradaExists && paradaExists.parada_id !== id) {
+      throw new BadRequestException('La parada ya existe');
+    }
+    await this.paradaRepository.update(id, updateParadaDto);
+    return { message: "Parada Actualizada" };
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} parada`;
+  async remove(id: number) {
+    const parada = await this.findOne(id);
+    if (!parada) {
+      throw new BadRequestException('La parada no existe');
+    }
+    await this.paradaRepository.delete(id);
+    return { message: "Parada Eliminada" };
   }
 }

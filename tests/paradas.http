@@ -9,7 +9,7 @@ GET http://localhost:3000/api/paradas/ciudad/Santo Domingo
 ###Buscar parada por like ciudad
 GET http://localhost:3000/api/paradas/buscar/gu
 
-###
+###Crear una parada
 POST http://localhost:3000/api/paradas
 Content-Type: application/json
 
@@ -17,4 +17,14 @@ Content-Type: application/json
     "ciudad": "guAno"
 }
 
+###Actualizar una parada
+PUT http://localhost:3000/api/paradas/9
+Content-Type: application/json
+
+{
+    "ciudad": "Ambato"
+}
+
+###Eliminar una parada
+DELETE http://localhost:3000/api/paradas/9
     
