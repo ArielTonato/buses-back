@@ -14,7 +14,7 @@ POST http://localhost:3000/api/paradas
 Content-Type: application/json
 
 {
-    "ciudad": "guAno"
+    "ciudad": "    "
 }
 
 ###Actualizar una parada
@@ -26,5 +26,4 @@ Content-Type: application/json
 }
 
 ###Eliminar una parada
-DELETE http://localhost:3000/api/paradas/9
-    
+DELETE http://localhost:3000/api/paradas/25

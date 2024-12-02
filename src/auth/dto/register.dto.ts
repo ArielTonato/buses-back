@@ -3,30 +3,28 @@ import {
     IsOptional, 
     IsPhoneNumber,  
     IsString, 
+    Matches, 
     MinLength 
 } from "class-validator";
 import { IsEcuadorianId } from "../../common/decorators/cedula.validator";
+import { ValidarCadena } from "src/common/decorators/cadenasTexto.decorator";
 
 export class RegisterDto {
     @IsString()
     @IsEcuadorianId({ message: "La cédula ingresada no es válida" })
     identificacion: string;
 
-    @IsString()
-    @MinLength(3, { message: "El primer nombre debe tener al menos 3 caracteres" })
+    @ValidarCadena({ value: "primer nombre" })
     primer_nombre: string;
 
 
-    @IsString()
-    @MinLength(3, { message: "El segundo nombre debe tener al menos 3 caracteres" })
+    @ValidarCadena({ value: "segundo nombre" })
     segundo_nombre: string;
 
-    @IsString()
-    @MinLength(3, { message: "El primer apellido debe tener al menos 3 caracteres" })
+    @ValidarCadena({ value: "primer apellido" })
     primer_apellido: string;
 
-    @IsString()
-    @MinLength(3, { message: "El segundo apellido debe tener al menos 3 caracteres" })
+    @ValidarCadena({ value: "segundo apellido" })
     segundo_apellido: string;
 
     @IsEmail({}, { message: "El correo ingresado no es válido" })
@@ -34,6 +32,7 @@ export class RegisterDto {
 
     @IsString()
     @MinLength(6, { message: "La contraseña debe tener al menos 6 caracteres" })
+    @Matches(/^(?!\s*$)(?:(?!^\s).)*$/, { message: 'Contraseña Invalida' })
     password: string;
 
     @IsPhoneNumber("EC", { message: "El número de teléfono debe ser válido para Ecuador" })

@@ -1,13 +1,11 @@
-import { IsBoolean, IsNumber, IsOptional, IsString, Matches } from "class-validator";
-import { Type } from "class-transformer";
-import { Capitalize } from "src/common/decorators/capitalize.decorator";
+
+import { IsBoolean, IsOptional, IsString, Matches, MinLength } from "class-validator";
+import { ValidarCadena } from "src/common/decorators/cadenasTexto.decorator";
+
 
 export class CreateParadaDto {
 
-
-    @IsString({message: "La ciudad debe ser una cadena de texto"})
-    @Matches(/^(?!\s*$)[a-zA-Z\s]+$/, { message: 'La ciudad no puede contener solo espacios ni números' })
-    @Capitalize()
+    @ValidarCadena()
     ciudad: string;
 
 
