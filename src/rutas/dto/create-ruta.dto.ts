@@ -11,13 +11,15 @@ export class CreateRutaDto {
     orden: number;
 
     @IsNumber({}, {message: "La distancia acumulada debe ser un número"})
-    distancia_acumulada: number;
+    distancia_parada: number;
 
     @IsNumber({}, {message: "El precio acumulado debe ser un número"})
-    precio_acumulado: number;
+    precio_parada: number;
 
+    //Este tiempo no debe ser mayor al tiempo de llegada de la frecuencia
+    @IsString({message: "El tiempo acumulado debe ser una cadena"})
     @IsString()
-    tiempo_acumulado: string;
+    tiempo_parada: string;
 
     @IsBoolean()
     @IsOptional()

@@ -11,27 +11,26 @@ export class Frecuencia {
   nombre_frecuencia: string;
 
   @Column()
-  ruta_id: number;
-
-  @Column()
   bus_id: number;
 
-  @ManyToOne(() => Bus)
+  @ManyToOne(() => Bus, bus => bus.frecuencias, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'bus_id' })
   bus: Bus;
 
   @Column()
   conductor_id: number;
 
-  @ManyToOne(() => User, user => user.frecuencias_conductor)
+  @ManyToOne(() => User, user => user.frecuencias_conductor, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'conductor_id' })
   conductor: User;
 
-  @Column('timestamp')
-  hora_salida: Date;
+  @Column('time')
+  hora_salida: string;
 
-  @Column('timestamp')
-  hora_llegada: Date;
+  @Column('time', { 
+    comment: 'Se asgina a la frecuencia' 
+  })
+  hora_llegada: string;
 
   @Column()
   origen: string;
@@ -39,14 +38,21 @@ export class Frecuencia {
   @Column()
   destino: string;
 
-  @Column({default: true})
-  activo: boolean;
-
-  @Column()
+  @Column({ 
+    comment: 'Provincia de llegada' 
+  })
   provincia: string;
 
-  @Column("float")
+  @Column({ default: true })
+  activo: boolean;
+
+  @Column('float', { 
+    comment: 'Se asigna de la frecuencia' 
+  })
   total: number;
+
+  @Column({default: false})
+  es_directo: boolean;
 
   @CreateDateColumn()
   fecha_creacion: Date;

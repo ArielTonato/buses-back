@@ -25,14 +25,22 @@ export class RutasService {
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} ruta`;
+    return this.rutaRepository.findOneBy({rutas_id: id});
   }
 
   update(id: number, updateRutaDto: UpdateRutaDto) {
+    //Antes de actualizar la ruta, verificar que la parada y la frecuencia existan
+    //Verificar que la parada y la frecuencia esten activas
+    //Verificar que no haya dos rutas con la misma parada y la misma frecuencia
     return `This action updates a #${id} ruta`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} ruta`;
+  async remove(id: number) {
+    const ruta = await this.rutaRepository.findOneBy({rutas_id: id});
+    if (!ruta) {
+      return {message: 'La ruta no existe'};
+    }
+    await this.rutaRepository.delete(id);
+    return {message:"Ruta Eliminada"}
   }
 }

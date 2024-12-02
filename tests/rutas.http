@@ -1,0 +1,19 @@
+###obtener todas las rutas
+GET http://localhost:3000/api/rutas
+
+###Crear una ruta
+POST http://localhost:3000/api/rutas
+Content-Type: application/json
+
+{
+    "frecuencia_id": 1,
+    "parada_id": 1,
+    "orden": 1,
+    "distancia_parada": 1,
+    "precio_parada": 1,
+    "tiempo_parada": "00:00:00"
+}
+
+
+###Eliminar una ruta
+DELETE http://localhost:3000/api/rutas/2

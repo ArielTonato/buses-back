@@ -16,13 +16,13 @@ export class Ruta {
   orden: number;
 
   @Column('float')
-  distancia_acumulada: number;
+  distancia_parada: number;
 
   @Column('float')
-  precio_acumulado: number;
+  precio_parada: number;
 
   @Column('time')
-  tiempo_acumulado: string;
+  tiempo_parada: string;
 
   @Column({default: true})
   activo: boolean;
