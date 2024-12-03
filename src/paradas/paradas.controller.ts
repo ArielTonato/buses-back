@@ -18,8 +18,8 @@ export class ParadasController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.paradasService.findOne(+id);
+  findOne(@Param('id') id: number) {
+    return this.paradasService.findOne(id);
   }
 
   @Get('ciudad/:ciudad')
@@ -33,12 +33,12 @@ export class ParadasController {
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateParadaDto: UpdateParadaDto) {
-    return this.paradasService.update(+id, updateParadaDto);
+  update(@Param('id') id: number, @Body() updateParadaDto: UpdateParadaDto) {
+    return this.paradasService.update(id, updateParadaDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.paradasService.remove(+id);
+  remove(@Param('id') id: number) {
+    return this.paradasService.remove(id);
   }
 }
