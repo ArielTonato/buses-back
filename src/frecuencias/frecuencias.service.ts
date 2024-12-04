@@ -1,26 +1,135 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateFrecuenciaDto } from './dto/create-frecuencia.dto';
 import { UpdateFrecuenciaDto } from './dto/update-frecuencia.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Frecuencia } from './entities/frecuencia.entity';
+import { Repository } from 'typeorm';
+import { User } from '../user/entities/user.entity';
+import { Roles } from '../common/enums/roles.enum';
 
 @Injectable()
 export class FrecuenciasService {
-  create(createFrecuenciaDto: CreateFrecuenciaDto) {
-    return 'This action adds a new frecuencia';
+  constructor(
+    @InjectRepository(Frecuencia)
+    private readonly frecuenciaRepository: Repository<Frecuencia>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+  ) { }
+
+  async create(createFrecuenciaDto: CreateFrecuenciaDto) {
+    const { conductor_id, hora_salida, hora_llegada } = createFrecuenciaDto;
+
+    // Validar que el usuario exista y sea conductor
+    const conductor = await this.userRepository.findOne({ 
+      where: { usuario_id: conductor_id },
+      select: ['usuario_id', 'rol']
+    });
+
+    if (!conductor) {
+      throw new BadRequestException(`El usuario con ID ${conductor_id} no existe`);
+    }
+
+    if (conductor.rol !== Roles.USUARIO_CONDUCTOR) {
+      throw new BadRequestException('Solo los usuarios con rol USUARIO_CONDUCTOR pueden ser asignados a frecuencias');
+    }
+
+    // Validar que las horas sean correctas
+    this.validateHoras(hora_salida, hora_llegada);
+
+    // Obtener frecuencias existentes del conductor
+    const conductorFrecuencias = await this.frecuenciaRepository.find({
+      where: { conductor_id },
+    });
+
+    // Validar que no haya solapamientos con las frecuencias existentes
+    this.validateSolapamiento(
+      conductorFrecuencias,
+      hora_salida,
+      hora_llegada,
+    );
+
+    // Guardar la nueva frecuencia
+    return this.frecuenciaRepository.save(createFrecuenciaDto);
   }
 
   findAll() {
-    return `This action returns all frecuencias`;
+    return this.frecuenciaRepository.find({
+      relations: ['conductor'],
+      select: {
+        conductor: {
+          primer_nombre: true,
+          primer_apellido: true,
+          rol: true
+        }
+      }
+    });
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} frecuencia`;
+    return this.frecuenciaRepository.findOne({ 
+      where: { frecuencia_id: id },
+      relations: ['conductor'],
+      select: {
+        conductor: {
+          primer_nombre: true,
+          primer_apellido: true,
+          rol: true
+        }
+      }
+    });
   }
 
-  update(id: number, updateFrecuenciaDto: UpdateFrecuenciaDto) {
-    return `This action updates a #${id} frecuencia`;
+  async update(id: number, updateFrecuenciaDto: UpdateFrecuenciaDto) {
+    const frecuencia = await this.frecuenciaRepository.findOne({ where: { frecuencia_id: id } });
+
+    if (!frecuencia) {
+      throw new BadRequestException(`Frecuencia con ID ${id} no encontrada`);
+    }
+
+    Object.assign(frecuencia, updateFrecuenciaDto);
+    return this.frecuenciaRepository.save(frecuencia);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} frecuencia`;
+  async remove(id: number) {
+    const frecuencia = await this.frecuenciaRepository.findOne({ where: { frecuencia_id: id } });
+
+    if (!frecuencia) {
+      throw new BadRequestException(`Frecuencia con ID ${id} no encontrada`);
+    }
+
+    return this.frecuenciaRepository.remove(frecuencia);
+  }
+
+  private validateHoras(hora_salida: string, hora_llegada: string): void {
+    const salida = new Date(`1970-01-01T${hora_salida}`);
+    const llegada = new Date(`1970-01-01T${hora_llegada}`);
+
+    if (salida >= llegada) {
+      throw new BadRequestException('La hora de salida debe ser menor a la hora de llegada');
+    }
+  }
+
+  private validateSolapamiento(
+    frecuencias: Frecuencia[],
+    nuevaHoraSalida: string,
+    nuevaHoraLlegada: string,
+  ): void {
+    const nuevaSalida = new Date(`1970-01-01T${nuevaHoraSalida}`);
+    const nuevaLlegada = new Date(`1970-01-01T${nuevaHoraLlegada}`);
+
+    for (const frecuencia of frecuencias) {
+      const frecuenciaSalida = new Date(`1970-01-01T${frecuencia.hora_salida}`);
+      const frecuenciaLlegada = new Date(`1970-01-01T${frecuencia.hora_llegada}`);
+
+      if (
+        (nuevaSalida >= frecuenciaSalida && nuevaSalida <= frecuenciaLlegada) ||
+        (nuevaLlegada >= frecuenciaSalida && nuevaLlegada <= frecuenciaLlegada) ||
+        (nuevaSalida <= frecuenciaSalida && nuevaLlegada >= frecuenciaLlegada)
+      ) {
+        throw new BadRequestException(
+          `El conductor ya tiene una frecuencia asignada entre ${frecuencia.hora_salida} y ${frecuencia.hora_llegada}`,
+        );
+      }
+    }
   }
 }

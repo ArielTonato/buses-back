@@ -1,0 +1,19 @@
+### Obtener todas las frecuencias
+GET http://localhost:3000/api/frecuencias
+
+
+### Crear una nueva frecuencia
+POST http://localhost:3000/api/frecuencias
+Content-Type: application/json
+
+{
+    "nombre_frecuencia": "Frecuencia 1",
+    "bus_id": 10,
+    "conductor_id": 17,
+    "hora_salida": "17:30:00",
+    "hora_llegada": "18:00:00",
+    "origen": "Origen",
+    "destino": "Destino",
+    "provincia": "Provincia",
+    "total": 10
+}

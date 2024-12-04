@@ -27,9 +27,7 @@ export class Frecuencia {
   @Column('time')
   hora_salida: string;
 
-  @Column('time', { 
-    comment: 'Se asgina a la frecuencia' 
-  })
+  @Column('time')
   hora_llegada: string;
 
   @Column()
@@ -38,19 +36,16 @@ export class Frecuencia {
   @Column()
   destino: string;
 
-  @Column({ 
-    comment: 'Provincia de llegada' 
-  })
+  @Column()
   provincia: string;
 
   @Column({ default: true })
   activo: boolean;
 
-  @Column('float', { 
-    comment: 'Se asigna de la frecuencia' 
-  })
+  @Column('float')
   total: number;
 
+  //El es directo me va a indicar si la frecuencia va mostrar o no paradas intermedias
   @Column({default: false})
   es_directo: boolean;
 
