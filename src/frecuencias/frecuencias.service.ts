@@ -6,6 +6,7 @@ import { Frecuencia } from './entities/frecuencia.entity';
 import { Repository } from 'typeorm';
 import { User } from '../user/entities/user.entity';
 import { Roles } from '../common/enums/roles.enum';
+import { Bus } from '../buses/entities/bus.entity';
 
 @Injectable()
 export class FrecuenciasService {
@@ -14,10 +15,22 @@ export class FrecuenciasService {
     private readonly frecuenciaRepository: Repository<Frecuencia>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Bus)
+    private readonly busRepository: Repository<Bus>,
   ) { }
 
   async create(createFrecuenciaDto: CreateFrecuenciaDto) {
-    const { conductor_id, hora_salida, hora_llegada } = createFrecuenciaDto;
+    const { conductor_id, hora_salida, hora_llegada, bus_id } = createFrecuenciaDto;
+
+    // Validar que el bus exista
+    const bus = await this.busRepository.findOne({ 
+      where: { bus_id },
+      select: ['bus_id']
+    });
+
+    if (!bus) {
+      throw new BadRequestException(`El bus con ID ${bus_id} no existe`);
+    }
 
     // Validar que el usuario exista y sea conductor
     const conductor = await this.userRepository.findOne({ 
@@ -54,12 +67,32 @@ export class FrecuenciasService {
 
   findAll() {
     return this.frecuenciaRepository.find({
-      relations: ['conductor'],
+      relations: {
+        conductor: true,
+        bus: {
+          fotos: true
+        }
+      },
       select: {
         conductor: {
+          usuario_id: true,
           primer_nombre: true,
           primer_apellido: true,
           rol: true
+        },
+        bus: {
+          bus_id: true,
+          numero_bus: true,
+          placa: true,
+          chasis: true,
+          carroceria: true,
+          total_asientos_normales: true,
+          total_asientos_vip: true,
+          fotos: {
+            foto_id: true,
+            url: true,
+            public_id: true
+          }
         }
       }
     });
@@ -68,12 +101,31 @@ export class FrecuenciasService {
   findOne(id: number) {
     return this.frecuenciaRepository.findOne({ 
       where: { frecuencia_id: id },
-      relations: ['conductor'],
+      relations: {
+        conductor: true,
+        bus: {
+          fotos: true
+        }
+      },
       select: {
         conductor: {
           primer_nombre: true,
           primer_apellido: true,
           rol: true
+        },
+        bus: {
+          bus_id: true,
+          numero_bus: true,
+          placa: true,
+          chasis: true,
+          carroceria: true,
+          total_asientos_normales: true,
+          total_asientos_vip: true,
+          fotos: {
+            foto_id: true,
+            url: true,
+            public_id: true
+          }
         }
       }
     });
@@ -113,7 +165,7 @@ export class FrecuenciasService {
     frecuencias: Frecuencia[],
     nuevaHoraSalida: string,
     nuevaHoraLlegada: string,
-  ): void {
+  ) {
     const nuevaSalida = new Date(`1970-01-01T${nuevaHoraSalida}`);
     const nuevaLlegada = new Date(`1970-01-01T${nuevaHoraLlegada}`);
 
