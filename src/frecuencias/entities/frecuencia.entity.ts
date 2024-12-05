@@ -1,6 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { Bus } from '../../buses/entities/bus.entity';
 import { User } from '../../user/entities/user.entity';
+import { Ruta } from '../../rutas/entities/ruta.entity';
 
 @Entity('frecuencias')
 export class Frecuencia {
@@ -48,6 +49,9 @@ export class Frecuencia {
   //El es directo me va a indicar si la frecuencia va mostrar o no paradas intermedias
   @Column({default: false})
   es_directo: boolean;
+
+  @OneToMany(() => Ruta, ruta => ruta.frecuencia)
+  rutas: Ruta[];
 
   @CreateDateColumn()
   fecha_creacion: Date;
