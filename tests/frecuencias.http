@@ -2,18 +2,50 @@
 GET http://localhost:3000/api/frecuencias
 
 
+###Obtener una frecuencia por ID
+GET http://localhost:3000/api/frecuencias/6
+
+
+###Obtener frecuencias por conductor
+GET http://localhost:3000/api/frecuencias/conductor/18
+
+###Obtener frecuencias por bus
+GET http://localhost:3000/api/frecuencias/bus/10
+
 ### Crear una nueva frecuencia
 POST http://localhost:3000/api/frecuencias
 Content-Type: application/json
 
 {
-    "nombre_frecuencia": "Frecuencia 1",
+    "nombre_frecuencia": "Ambato - Riobamba",
     "bus_id": 10,
-    "conductor_id": 17,
-    "hora_salida": "17:30:00",
-    "hora_llegada": "18:00:00",
+    "conductor_id": 19,
+    "hora_salida": "18:30:00",
+    "hora_llegada": "19:00:00",
     "origen": "Origen",
     "destino": "Destino",
     "provincia": "Provincia",
+    "total": 10
+}
+
+
+###Eliminar 
+DELETE http://localhost:3000/api/frecuencias/7
+
+
+###Actualizar
+PUT http://localhost:3000/api/frecuencias/8
+Content-Type: application/json
+
+{
+    "nombre_frecuencia": "Frecuencia 1",
+    "bus_id": 14,
+    "conductor_id": 18,
+    "hora_salida": "18:30:00",
+    "hora_llegada": "19:00:00",
+    "origen": "  ambato  ",
+    "destino": "  rioBamba  ",
+    "provincia": "Provincia",
+    "es_directo": true,
     "total": 10
 }

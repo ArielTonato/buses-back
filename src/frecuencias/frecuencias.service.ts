@@ -1,11 +1,11 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Not, Repository } from 'typeorm';
+
 import { CreateFrecuenciaDto } from './dto/create-frecuencia.dto';
 import { UpdateFrecuenciaDto } from './dto/update-frecuencia.dto';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Frecuencia } from './entities/frecuencia.entity';
-import { Repository } from 'typeorm';
 import { User } from '../user/entities/user.entity';
-import { Roles } from '../common/enums/roles.enum';
 import { Bus } from '../buses/entities/bus.entity';
 
 @Injectable()
@@ -17,142 +17,148 @@ export class FrecuenciasService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(Bus)
     private readonly busRepository: Repository<Bus>,
-  ) { }
+  ) {}
 
   async create(createFrecuenciaDto: CreateFrecuenciaDto) {
     const { conductor_id, hora_salida, hora_llegada, bus_id } = createFrecuenciaDto;
 
-    // Validar que el bus exista
-    const bus = await this.busRepository.findOne({ 
+    await this.validateBus(bus_id);
+    await this.validateConductor(conductor_id);
+    this.validateHoras(hora_salida, hora_llegada);
+
+    const conductorFrecuencias = await this.fetchConductorFrecuencias(conductor_id);
+    const busFrecuencias = await this.fetchBusFrecuencias(bus_id);
+
+    this.validateConductorSolapamiento(conductorFrecuencias, hora_salida, hora_llegada);
+    this.validateBusSolapamiento(busFrecuencias, hora_salida, hora_llegada);
+
+    return this.frecuenciaRepository.save(createFrecuenciaDto);
+  }
+
+  findAll() {
+    return this.frecuenciaRepository.find({
+      where: { activo: true },
+      relations: {
+        conductor: true,
+        bus: {
+          fotos: true,
+        },
+      },
+    });
+  }
+
+  async findOne(id: number) {
+    return this.findFrecuenciaById(id);
+  }
+
+  async findByConductor(id: number) {
+    const frecuencias = await this.frecuenciaRepository.find({
+      where: { conductor_id: id },
+      relations: {
+        conductor: true,
+        bus: {
+          fotos: true,
+        },
+      },
+    });
+
+    if (frecuencias.length === 0) {
+      throw new BadRequestException(`Frecuencias para el conductor con ID ${id} no encontradas`);
+    }
+
+    return frecuencias;
+  }
+
+  async findByBus(id: number) {
+    const frecuencias = await this.frecuenciaRepository.find({
+      where: { bus_id: id },
+      relations: {
+        conductor: true,
+        bus: {
+          fotos: true,
+        },
+      },
+    });
+
+    if (frecuencias.length === 0) {
+      throw new BadRequestException(`Frecuencias para el bus con ID ${id} no encontradas`);
+    }
+
+    return frecuencias;
+  }
+
+  async update(id: number, updateFrecuenciaDto: UpdateFrecuenciaDto) {
+    const frecuencia = await this.findFrecuenciaById(id);
+    const { conductor_id, bus_id, hora_salida, hora_llegada } = updateFrecuenciaDto;
+
+    if (conductor_id) {
+      await this.validateConductor(conductor_id);
+    }
+
+    if (bus_id) {
+      await this.validateBus(bus_id);
+    }
+
+    if (hora_salida && hora_llegada) {
+      this.validateHoras(hora_salida, hora_llegada);
+      
+      const conductorFrecuencias = await this.fetchConductorFrecuenciasExcludingCurrent(
+        id, 
+        conductor_id || frecuencia.conductor_id
+      );
+
+      this.validateConductorSolapamiento(conductorFrecuencias, hora_salida, hora_llegada);
+    } else if ((hora_salida && !hora_llegada) || (!hora_salida && hora_llegada)) {
+      throw new BadRequestException('Debe proporcionar tanto hora_salida como hora_llegada');
+    }
+
+    await this.frecuenciaRepository.update(id, updateFrecuenciaDto);
+    return this.findOne(id);
+  }
+
+  async remove(id: number) {
+    const frecuencia = await this.findFrecuenciaById(id);
+
+    if (!frecuencia.activo) {
+      return;
+    }
+
+    await this.frecuenciaRepository.update(id, { activo: false });
+
+    return {
+      message: `Frecuencia con ID ${id} desactivada correctamente`,
+    };
+  }
+
+  // Validation and helper methods
+  private async validateBus(bus_id: number) {
+    const bus = await this.busRepository.findOne({
       where: { bus_id },
-      select: ['bus_id']
+      select: ['bus_id'],
     });
 
     if (!bus) {
       throw new BadRequestException(`El bus con ID ${bus_id} no existe`);
     }
+  }
 
-    // Validar que el usuario exista y sea conductor
-    const conductor = await this.userRepository.findOne({ 
+  private async validateConductor(conductor_id: number) {
+    const conductor = await this.userRepository.findOne({
       where: { usuario_id: conductor_id },
-      select: ['usuario_id', 'rol']
+      select: ['usuario_id', 'rol'],
     });
 
     if (!conductor) {
       throw new BadRequestException(`El usuario con ID ${conductor_id} no existe`);
     }
 
-    if (conductor.rol !== Roles.USUARIO_CONDUCTOR) {
-      throw new BadRequestException('Solo los usuarios con rol USUARIO_CONDUCTOR pueden ser asignados a frecuencias');
-    }
-
-    // Validar que las horas sean correctas
-    this.validateHoras(hora_salida, hora_llegada);
-
-    // Obtener frecuencias existentes del conductor
-    const conductorFrecuencias = await this.frecuenciaRepository.find({
-      where: { conductor_id },
-    });
-
-    // Validar que no haya solapamientos con las frecuencias existentes
-    this.validateSolapamiento(
-      conductorFrecuencias,
-      hora_salida,
-      hora_llegada,
-    );
-
-    // Guardar la nueva frecuencia
-    return this.frecuenciaRepository.save(createFrecuenciaDto);
+    // Optional: Role-based validation
+    // if (conductor.rol !== Roles.USUARIO_CONDUCTOR) {
+    //   throw new BadRequestException('Solo los usuarios con rol USUARIO_CONDUCTOR pueden ser asignados a frecuencias');
+    // }
   }
 
-  findAll() {
-    return this.frecuenciaRepository.find({
-      relations: {
-        conductor: true,
-        bus: {
-          fotos: true
-        }
-      },
-      select: {
-        conductor: {
-          usuario_id: true,
-          primer_nombre: true,
-          primer_apellido: true,
-          rol: true
-        },
-        bus: {
-          bus_id: true,
-          numero_bus: true,
-          placa: true,
-          chasis: true,
-          carroceria: true,
-          total_asientos_normales: true,
-          total_asientos_vip: true,
-          fotos: {
-            foto_id: true,
-            url: true,
-            public_id: true
-          }
-        }
-      }
-    });
-  }
-
-  findOne(id: number) {
-    return this.frecuenciaRepository.findOne({ 
-      where: { frecuencia_id: id },
-      relations: {
-        conductor: true,
-        bus: {
-          fotos: true
-        }
-      },
-      select: {
-        conductor: {
-          primer_nombre: true,
-          primer_apellido: true,
-          rol: true
-        },
-        bus: {
-          bus_id: true,
-          numero_bus: true,
-          placa: true,
-          chasis: true,
-          carroceria: true,
-          total_asientos_normales: true,
-          total_asientos_vip: true,
-          fotos: {
-            foto_id: true,
-            url: true,
-            public_id: true
-          }
-        }
-      }
-    });
-  }
-
-  async update(id: number, updateFrecuenciaDto: UpdateFrecuenciaDto) {
-    const frecuencia = await this.frecuenciaRepository.findOne({ where: { frecuencia_id: id } });
-
-    if (!frecuencia) {
-      throw new BadRequestException(`Frecuencia con ID ${id} no encontrada`);
-    }
-
-    Object.assign(frecuencia, updateFrecuenciaDto);
-    return this.frecuenciaRepository.save(frecuencia);
-  }
-
-  async remove(id: number) {
-    const frecuencia = await this.frecuenciaRepository.findOne({ where: { frecuencia_id: id } });
-
-    if (!frecuencia) {
-      throw new BadRequestException(`Frecuencia con ID ${id} no encontrada`);
-    }
-
-    return this.frecuenciaRepository.remove(frecuencia);
-  }
-
-  private validateHoras(hora_salida: string, hora_llegada: string): void {
+  private validateHoras(hora_salida: string, hora_llegada: string) {
     const salida = new Date(`1970-01-01T${hora_salida}`);
     const llegada = new Date(`1970-01-01T${hora_llegada}`);
 
@@ -161,10 +167,58 @@ export class FrecuenciasService {
     }
   }
 
-  private validateSolapamiento(
+  private async fetchConductorFrecuencias(conductor_id: number) {
+    return this.frecuenciaRepository.find({
+      where: { conductor_id },
+    });
+  }
+
+  private async fetchBusFrecuencias(bus_id: number) {
+    return this.frecuenciaRepository.find({
+      where: { bus_id },
+    });
+  }
+
+  private async fetchConductorFrecuenciasExcludingCurrent(currentId: number, conductor_id: number) {
+    return this.frecuenciaRepository.find({
+      where: { 
+        conductor_id,
+        frecuencia_id: Not(currentId),
+      },
+    });
+  }
+
+  private validateConductorSolapamiento(
     frecuencias: Frecuencia[],
     nuevaHoraSalida: string,
     nuevaHoraLlegada: string,
+  ) {
+    this.validateTimeOverlap(
+      frecuencias, 
+      nuevaHoraSalida, 
+      nuevaHoraLlegada, 
+      'El conductor ya tiene una frecuencia asignada entre'
+    );
+  }
+
+  private validateBusSolapamiento(
+    frecuencias: Frecuencia[],
+    nuevaHoraSalida: string,
+    nuevaHoraLlegada: string,
+  ) {
+    this.validateTimeOverlap(
+      frecuencias, 
+      nuevaHoraSalida, 
+      nuevaHoraLlegada, 
+      'El bus ya tiene una frecuencia asignada entre'
+    );
+  }
+
+  private validateTimeOverlap(
+    frecuencias: Frecuencia[],
+    nuevaHoraSalida: string,
+    nuevaHoraLlegada: string,
+    errorMessage: string,
   ) {
     const nuevaSalida = new Date(`1970-01-01T${nuevaHoraSalida}`);
     const nuevaLlegada = new Date(`1970-01-01T${nuevaHoraLlegada}`);
@@ -179,9 +233,27 @@ export class FrecuenciasService {
         (nuevaSalida <= frecuenciaSalida && nuevaLlegada >= frecuenciaLlegada)
       ) {
         throw new BadRequestException(
-          `El conductor ya tiene una frecuencia asignada entre ${frecuencia.hora_salida} y ${frecuencia.hora_llegada}`,
+          `${errorMessage} ${frecuencia.hora_salida} y ${frecuencia.hora_llegada}`,
         );
       }
     }
+  }
+
+  private async findFrecuenciaById(id: number) {
+    const frecuencia = await this.frecuenciaRepository.findOne({
+      where: { frecuencia_id: id },
+      relations: {
+        conductor: true,
+        bus: {
+          fotos: true,
+        },
+      },
+    });
+
+    if (!frecuencia) {
+      throw new BadRequestException(`Frecuencia con ID ${id} no encontrada`);
+    }
+
+    return frecuencia;
   }
 }

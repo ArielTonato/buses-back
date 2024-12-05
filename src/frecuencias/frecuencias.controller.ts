@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put } from '@nestjs/common';
 import { FrecuenciasService } from './frecuencias.service';
 import { CreateFrecuenciaDto } from './dto/create-frecuencia.dto';
 import { UpdateFrecuenciaDto } from './dto/update-frecuencia.dto';
@@ -18,13 +18,23 @@ export class FrecuenciasController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.frecuenciasService.findOne(+id);
+  findOne(@Param('id') id: number) {
+    return this.frecuenciasService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateFrecuenciaDto: UpdateFrecuenciaDto) {
-    return this.frecuenciasService.update(+id, updateFrecuenciaDto);
+  @Get('conductor/:id')
+  findByConductor(@Param('id') id: number) {
+    return this.frecuenciasService.findByConductor(id);
+  }
+
+  @Get('bus/:id')
+  findByBus(@Param('id') id: number) {
+    return this.frecuenciasService.findByBus(id);
+  }
+
+  @Put(':id')
+  update(@Param('id') id: number, @Body() updateFrecuenciaDto: UpdateFrecuenciaDto) {
+    return this.frecuenciasService.update(id, updateFrecuenciaDto);
   }
 
   @Delete(':id')
