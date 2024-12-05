@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { Frecuencia } from '../../frecuencias/entities/frecuencia.entity';
+import { Parada } from '../../paradas/entities/parada.entity';
 
 @Entity('rutas')
 export class Ruta {
@@ -16,6 +17,10 @@ export class Ruta {
 
   @Column()
   parada_id: number;
+
+  @ManyToOne(() => Parada, parada => parada.rutas, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'parada_id' })
+  parada: Parada;
 
   @Column()
   orden: number;

@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } from 'typeorm';
+import { Ruta } from '../../rutas/entities/ruta.entity';
 
 @Entity('paradas')
 export class Parada {
@@ -7,6 +8,9 @@ export class Parada {
 
   @Column()
   ciudad: string;
+
+  @OneToMany(() => Ruta, ruta => ruta.parada)
+  rutas: Ruta[];
 
   @Column({default: true})
   activo: boolean;
