@@ -47,6 +47,60 @@ export class FrecuenciasService {
     });
   }
 
+  async findByDestino(destino: string) {
+    const frecuencias = await this.frecuenciaRepository.find({
+      where: { destino },
+      relations: {
+        conductor: true,
+        bus: {
+          fotos: true,
+        },
+      },
+    });
+
+    if (frecuencias.length === 0) {
+      throw new BadRequestException(`Frecuencias para el destino ${destino} no encontradas`);
+    }
+
+    return frecuencias;
+  }
+
+  async findByProvincia(provincia: string) {
+    const frecuencias = await this.frecuenciaRepository.find({
+      where: { provincia },
+      relations: {
+        conductor: true,
+        bus: {
+          fotos: true,
+        },
+      },
+    });
+
+    if (frecuencias.length === 0) {
+      throw new BadRequestException(`Frecuencias para la provincia ${provincia} no encontradas`);
+    }
+
+    return frecuencias;
+  }
+
+  async findByOrigen(origen: string) {
+    const frecuencias = await this.frecuenciaRepository.find({
+      where: { origen },
+      relations: {
+        conductor: true,
+        bus: {
+          fotos: true,
+        },
+      },
+    });
+
+    if (frecuencias.length === 0) {
+      throw new BadRequestException(`Frecuencias para el origen ${origen} no encontradas`);
+    }
+
+    return frecuencias;
+  }
+
   async findOne(id: number) {
     return this.findFrecuenciaById(id);
   }
@@ -152,7 +206,6 @@ export class FrecuenciasService {
       throw new BadRequestException(`El usuario con ID ${conductor_id} no existe`);
     }
 
-    // Optional: Role-based validation
     // if (conductor.rol !== Roles.USUARIO_CONDUCTOR) {
     //   throw new BadRequestException('Solo los usuarios con rol USUARIO_CONDUCTOR pueden ser asignados a frecuencias');
     // }

@@ -32,6 +32,21 @@ export class FrecuenciasController {
     return this.frecuenciasService.findByBus(id);
   }
 
+  @Get('destino/:destino')
+  findByDestino(@Param('destino') destino: string) {
+    return this.frecuenciasService.findByDestino(destino);
+  }
+
+  @Get('provincia/:provincia')
+  findByProvincia(@Param('provincia') provincia: string) {
+    return this.frecuenciasService.findByProvincia(provincia);
+  }
+
+  @Get('origen/:origen')
+  findByOrigen(@Param('origen') origen: string) {
+    return this.frecuenciasService.findByOrigen(origen);
+  }
+
   @Put(':id')
   update(@Param('id') id: number, @Body() updateFrecuenciaDto: UpdateFrecuenciaDto) {
     return this.frecuenciasService.update(id, updateFrecuenciaDto);
