@@ -13,25 +13,22 @@ import { AsientosModule } from './asientos/asientos.module';
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: 'localhost',
-      port: 5432, //Poner el puerto de su base de datos
-      username:"root",
-      password:"12345",
-      database:"bd_buses",//Nombrar su base de esta manera
+      port: 3306, //Poner el puerto de su base de datos
+      username: 'root',
+      password: '',
+      database: 'bd_buses', //Nombrar su base de esta manera
       autoLoadEntities: true,
       synchronize: true,
     }),
-    ConfigModule.forRoot(
-      {
-        isGlobal: true,
-        
-      }
-    ),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     UserModule,
     AuthModule,
     BusesModule,
     CloudinaryModule,
     BusesFotosModule,
-    AsientosModule
+    AsientosModule,
   ],
   controllers: [],
   providers: [],
