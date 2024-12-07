@@ -10,6 +10,7 @@ import { AsientosModule } from './asientos/asientos.module';
 import { FrecuenciasModule } from './frecuencias/frecuencias.module';
 import { ParadasModule } from './paradas/paradas.module';
 import { RutasModule } from './rutas/rutas.module';
+import { ComprobantesPagosModule } from './comprobantes_pagos/comprobantes_pagos.module';
 
 @Module({
   imports: [
@@ -37,7 +38,8 @@ import { RutasModule } from './rutas/rutas.module';
     AsientosModule,
     FrecuenciasModule,
     ParadasModule,
-    RutasModule
+    RutasModule,
+    ComprobantesPagosModule
   ],
   controllers: [],
   providers: [],
