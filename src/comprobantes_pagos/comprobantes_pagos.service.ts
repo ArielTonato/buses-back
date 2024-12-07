@@ -1,15 +1,24 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CreateComprobantesPagoDto } from './dto/create-comprobantes_pago.dto';
 import { UpdateComprobantesPagoDto } from './dto/update-comprobantes_pago.dto';
+import { ComprobantePago } from './entities/comprobantes_pago.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class ComprobantesPagosService {
+
+  constructor(
+    @InjectRepository(ComprobantePago)
+    private comprobantePagoRepository: Repository<ComprobantePago>,
+  ) {}
+
   create(createComprobantesPagoDto: CreateComprobantesPagoDto) {
-    return 'This action adds a new comprobantesPago';
+    return this.comprobantePagoRepository.save(createComprobantesPagoDto);
   }
 
   findAll() {
-    return `This action returns all comprobantesPagos`;
+    return this.comprobantePagoRepository.find();
   }
 
   findOne(id: number) {
