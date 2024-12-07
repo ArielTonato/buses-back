@@ -18,17 +18,17 @@ export class ComprobantesPagosController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.comprobantesPagosService.findOne(+id);
+  findOne(@Param('id') id: number) {
+    return this.comprobantesPagosService.findOne(id);
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateComprobantesPagoDto: UpdateComprobantesPagoDto) {
-    return this.comprobantesPagosService.update(+id, updateComprobantesPagoDto);
+  update(@Param('id') id: number, @Body() updateComprobantesPagoDto: UpdateComprobantesPagoDto) {
+    return this.comprobantesPagosService.update(id, updateComprobantesPagoDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.comprobantesPagosService.remove(+id);
+  remove(@Param('id') id: number) {
+    return this.comprobantesPagosService.remove(id);
   }
 }
