@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository } from 'typeorm';
 
@@ -35,15 +35,32 @@ export class FrecuenciasService {
     return this.frecuenciaRepository.save(createFrecuenciaDto);
   }
 
-  findAll() {
-    return this.frecuenciaRepository.find({
+  async findAll() {
+    const frecuencias = await this.frecuenciaRepository.find({
       where: { activo: true },
       relations: {
         conductor: true,
         bus: {
           fotos: true,
         },
+        rutas: {
+          parada: true,
+        },
       },
+      order: {
+        rutas: {
+          orden: 'ASC',
+        },
+      },
+    });
+
+    // Procesar cada frecuencia para mostrar rutas solo si NO es directo
+    return frecuencias.map(frecuencia => {
+      if (frecuencia.es_directo) {
+        // Si es directo, no mostrar rutas
+        frecuencia.rutas = [];
+      }
+      return frecuencia;
     });
   }
 
@@ -102,7 +119,34 @@ export class FrecuenciasService {
   }
 
   async findOne(id: number) {
-    return this.findFrecuenciaById(id);
+    const frecuencia = await this.frecuenciaRepository.findOne({
+      where: { frecuencia_id: id },
+      relations: {
+        conductor: true,
+        bus: {
+          fotos: true,
+        },
+        rutas: {
+          parada: true,
+        },
+      },
+      order: {
+        rutas: {
+          orden: 'ASC',
+        },
+      },
+    });
+
+    if (!frecuencia) {
+      throw new NotFoundException(`Frecuencia con ID ${id} no encontrada`);
+    }
+
+    // Si es directo, no mostrar rutas
+    if (frecuencia.es_directo) {
+      frecuencia.rutas = [];
+    }
+
+    return frecuencia;
   }
 
   async findByConductor(id: number) {

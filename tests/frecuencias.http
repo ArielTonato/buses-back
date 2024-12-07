@@ -3,7 +3,7 @@ GET http://localhost:3000/api/frecuencias
 
 
 ###Obtener una frecuencia por ID
-GET http://localhost:3000/api/frecuencias/6
+GET http://localhost:3000/api/frecuencias/9
 
 
 ###Obtener frecuencias por conductor
@@ -44,7 +44,7 @@ DELETE http://localhost:3000/api/frecuencias/7
 
 
 ###Actualizar
-PUT http://localhost:3000/api/frecuencias/8
+PUT http://localhost:3000/api/frecuencias/9
 Content-Type: application/json
 
 {

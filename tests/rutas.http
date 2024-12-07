@@ -12,10 +12,10 @@ Content-Type: application/json
 {
     "frecuencia_id": 9,
     "parada_id": 30,
-    "orden": 1,
+    "orden": 2,
     "distancia_parada": 45,
     "precio_parada": 1.2,
-    "tiempo_parada": "18:45:00"
+    "tiempo_parada": "18:55:00"
 }
 
 
