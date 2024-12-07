@@ -1,7 +1,13 @@
+###Listar comprobantes de pago
+GET http://localhost:3000/api/comprobantes-pagos
+
 ###Crear un comprobante de pago
 POST http://localhost:3000/api/comprobantes-pagos
 Content-Type: application/json
 
 {
-    
+    "boleto_id": 1,
+    "usuario_id": 1,
+    "url_comprobante": "https://example.com/comprobante.pdf",
+    "estado": "pendiente"
 }

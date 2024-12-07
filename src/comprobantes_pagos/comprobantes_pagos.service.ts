@@ -1,9 +1,9 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateComprobantesPagoDto } from './dto/create-comprobantes_pago.dto';
 import { UpdateComprobantesPagoDto } from './dto/update-comprobantes_pago.dto';
 import { ComprobantePago } from './entities/comprobantes_pago.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import {  Repository } from 'typeorm';
 
 @Injectable()
 export class ComprobantesPagosService {
@@ -17,8 +17,12 @@ export class ComprobantesPagosService {
     return this.comprobantePagoRepository.save(createComprobantesPagoDto);
   }
 
-  findAll() {
-    return this.comprobantePagoRepository.find();
+  async findAll() {
+    const comprobantes = await this.comprobantePagoRepository.find();
+    if (!comprobantes) {
+      throw new NotFoundException('No se encontraron comprobantes de pago');
+    }
+    return comprobantes;
   }
 
   findOne(id: number) {
