@@ -45,6 +45,14 @@ export class UserService {
     return this.userRepository.findOneBy({ identificacion: cedula });
   }
 
+  async findOneByCedulaNoRestrict(cedula: string) {
+    const user = await this.userRepository.findOneBy({ identificacion: cedula });
+    if (!user) {
+      throw new BadRequestException('El usuario no existe');
+    }
+    return user;
+  }
+
   findOneByNameOrLastName(name: string) {
     return this.userRepository.find({
       where: [

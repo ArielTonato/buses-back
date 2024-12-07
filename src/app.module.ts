@@ -7,7 +7,9 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { ConfigModule } from '@nestjs/config';
 import { BusesFotosModule } from './buses-fotos/buses-fotos.module';
 import { AsientosModule } from './asientos/asientos.module';
-import { RouterModule } from '@angular/router';
+import { FrecuenciasModule } from './frecuencias/frecuencias.module';
+import { ParadasModule } from './paradas/paradas.module';
+import { RutasModule } from './rutas/rutas.module';
 
 @Module({
   imports: [
@@ -30,7 +32,9 @@ import { RouterModule } from '@angular/router';
     CloudinaryModule,
     BusesFotosModule,
     AsientosModule,
-    RouterModule.forRoot([]), // Add your routes here
+    FrecuenciasModule,
+    ParadasModule,
+    RutasModule,
   ],
   controllers: [],
   providers: [],
