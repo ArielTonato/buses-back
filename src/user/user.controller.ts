@@ -5,7 +5,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Auth } from 'src/auth/decorators/auth.decorator';
 import { Roles } from 'src/common/enums/roles.enum';
 
-@Auth(Roles.ADMINISTRADORES)
+// @Auth(Roles.ADMINISTRADORES)
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -28,6 +28,11 @@ export class UserController {
   @Get('search/:name')
   findOneByNameOrLastName(@Param('name') name: string) {
     return this.userService.findOneByNameOrLastName(name);
+  }
+
+  @Get('cedula/:cedula')
+  findOneByCedula(@Param('cedula') cedula: string) {
+    return this.userService.findOneByCedulaNoRestrict(cedula);
   }
 
 

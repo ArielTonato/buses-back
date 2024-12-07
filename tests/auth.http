@@ -3,14 +3,14 @@ POST http://localhost:3000/api/auth/register
 Content-Type: application/json
 
 {
-    "identificacion":"1850509249",
-    "primer_nombre":"Cristina",
-    "segundo_nombre":"Estefania",
-    "primer_apellido":"Chacha",
-    "segundo_apellido":"Machado",
-    "correo":"cristina@edu.com",
+    "identificacion":"0504375734",
+    "primer_nombre":"   aleX ",
+    "segundo_nombre":" aRiel",
+    "primer_apellido":"  tonato ",
+    "segundo_apellido":" GudiÑO",
+    "correo":"atonato5734@edu.com",
     "password":"123456",
-    "telefono":"0988508826",
+    "telefono":"0988850126",
     "direccion":"Calle 123"
 }
 
