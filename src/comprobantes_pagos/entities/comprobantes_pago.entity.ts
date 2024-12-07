@@ -11,7 +11,7 @@ export class ComprobantePago {
   @Column()
   usuario_id: number;
 
-  @Column()
+  @Column({nullable: true})
   url_comprobante: string;
 
   @Column({

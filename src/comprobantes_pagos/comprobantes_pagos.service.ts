@@ -3,7 +3,8 @@ import { CreateComprobantesPagoDto } from './dto/create-comprobantes_pago.dto';
 import { UpdateComprobantesPagoDto } from './dto/update-comprobantes_pago.dto';
 import { ComprobantePago } from './entities/comprobantes_pago.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import {  Repository } from 'typeorm';
+import { Repository } from 'typeorm';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Injectable()
 export class ComprobantesPagosService {
@@ -11,9 +12,17 @@ export class ComprobantesPagosService {
   constructor(
     @InjectRepository(ComprobantePago)
     private comprobantePagoRepository: Repository<ComprobantePago>,
+    private cloudinaryService: CloudinaryService,
   ) {}
 
-  create(createComprobantesPagoDto: CreateComprobantesPagoDto) {
+  async create(createComprobantesPagoDto: CreateComprobantesPagoDto, file: Express.Multer.File) {
+    // Subir la imagen a Cloudinary
+    const cloudinaryResponse = await this.cloudinaryService.upload(file);
+    
+    // Asignar la URL de la imagen al DTO
+    createComprobantesPagoDto.url_comprobante = cloudinaryResponse.secure_url;
+    
+    // Guardar el comprobante en la base de datos
     return this.comprobantePagoRepository.save(createComprobantesPagoDto);
   }
 
@@ -26,7 +35,7 @@ export class ComprobantesPagosService {
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} comprobantesPago`;
+    return this.comprobantePagoRepository.findOneBy({comprobante_id: id});
   }
 
   update(id: number, updateComprobantesPagoDto: UpdateComprobantesPagoDto) {
