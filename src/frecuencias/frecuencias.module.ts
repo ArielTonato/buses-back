@@ -12,5 +12,6 @@ import { Bus } from '../buses/entities/bus.entity';
   ],
   controllers: [FrecuenciasController],
   providers: [FrecuenciasService],
+  exports: [FrecuenciasService], // Exportando el servicio
 })
 export class FrecuenciasModule {}

@@ -14,7 +14,7 @@ POST http://localhost:3000/api/paradas
 Content-Type: application/json
 
 {
-    "ciudad": "   qUero "
+    "ciudad": "Latacunga"
 }
 
 ###Actualizar una parada

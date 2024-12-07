@@ -1,4 +1,4 @@
-import { IsNumber, IsBoolean, IsOptional, IsString } from 'class-validator';
+import { IsNumber, IsBoolean, IsOptional, IsString, Min } from 'class-validator';
 
 export class CreateRutaDto {
     @IsNumber({}, {message: "La frecuencia debe ser un número"})
@@ -11,13 +11,14 @@ export class CreateRutaDto {
     orden: number;
 
     @IsNumber({}, {message: "La distancia acumulada debe ser un número"})
+    @Min(0)
     distancia_parada: number;
 
     @IsNumber({}, {message: "El precio acumulado debe ser un número"})
+    @Min(0)
     precio_parada: number;
 
     //Este tiempo no debe ser mayor al tiempo de llegada de la frecuencia
-    @IsString({message: "El tiempo acumulado debe ser una cadena"})
     @IsString()
     tiempo_parada: string;
 

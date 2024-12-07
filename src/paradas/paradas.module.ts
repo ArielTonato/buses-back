@@ -10,5 +10,6 @@ import { Parada } from './entities/parada.entity';
   ],
   controllers: [ParadasController],
   providers: [ParadasService],
+  exports: [ParadasService], // Exportando el servicio
 })
 export class ParadasModule {}
