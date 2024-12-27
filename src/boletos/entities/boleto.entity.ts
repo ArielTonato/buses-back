@@ -6,7 +6,7 @@ export class Boleto {
     @PrimaryGeneratedColumn()
     boleto_id: number
 
-    @Column()
+    @Column("float")
     total: number
 
     @Column()
@@ -25,7 +25,7 @@ export class Boleto {
         {
             type: 'enum',
             enum: EstadoBoleto,
-            default: EstadoBoleto.PENDIENTE
+            default: EstadoBoleto.PAGADO
         }
     )
     estado: EstadoBoleto
@@ -37,6 +37,6 @@ export class Boleto {
     asientos: string
 
     @Column({type:"timestamp", default: () => "CURRENT_TIMESTAMP", onUpdate: "CURRENT_TIMESTAMP"})
-    fecha_creacion: Date
+    fecha_emision: Date
     
 }

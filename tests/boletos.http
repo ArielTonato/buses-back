@@ -1,0 +1,16 @@
+###Crear boleto en teoria el boleto se crea con la reserva despues de que esta se confirma
+POST http://localhost:3000/api/boletos
+Content-Type: application/json
+
+{
+    "total": 100,
+    "asientos": "A1,A2,A3",
+    "cantidad_asientos": 3
+}
+
+###Obtener boletos
+GET http://localhost:3000/api/boletos
+
+
+###Obtener boleto por id
+GET http://localhost:3000/api/boletos/12
