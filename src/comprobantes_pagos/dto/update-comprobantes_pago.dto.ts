@@ -1,4 +1,16 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateComprobantesPagoDto } from './create-comprobantes_pago.dto';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { EstadoComprobante } from '../../common/enums/comprobantes.enum';
 
-export class UpdateComprobantesPagoDto extends PartialType(CreateComprobantesPagoDto) {}
+export class UpdateComprobantesPagoDto {
+    @IsEnum(EstadoComprobante)
+    @IsOptional()
+    estado?: EstadoComprobante;
+
+    @IsString()
+    @IsOptional()
+    comentarios?: string;
+
+    @IsString()
+    @IsOptional()
+    url_comprobante?: string;
+}

@@ -14,15 +14,14 @@ Content-Type: application/json
 }
 
 ###Obtener un comprobante de pago por ID
-GET http://localhost:3000/api/comprobantes-pagos/2
+GET http://localhost:3000/api/comprobantes-pagos/4
 
 ###Actualizar un comprobante de pago por ID
-PUT http://localhost:3000/api/comprobantes-pagos/2
+##Solo se de puede actualizar el estado y añadir comentarios
+PUT http://localhost:3000/api/comprobantes-pagos/4
 Content-Type: application/json
 
 {
-    "boleto_id": 1,
-    "usuario_id": 1,
     "estado": "rechazado",
     "comentarios": "El boleto no estaba disponible"
 }

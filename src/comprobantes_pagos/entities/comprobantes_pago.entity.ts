@@ -1,5 +1,6 @@
 import { EstadoComprobante } from 'src/common/enums/comprobantes.enum';
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { User } from 'src/user/entities/user.entity';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 
 @Entity('comprobante_pago')
 export class ComprobantePago {
@@ -8,6 +9,10 @@ export class ComprobantePago {
 
   @Column()
   boleto_id: number;
+
+  @ManyToOne(() => User, user => user.comprobantes)
+  @JoinColumn({ name: 'usuario_id' })
+  usuario: User;
 
   @Column()
   usuario_id: number;

@@ -1,6 +1,7 @@
 import { Roles } from "../../common/enums/roles.enum";
 import { Column, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Frecuencia } from "../../frecuencias/entities/frecuencia.entity";
+import { ComprobantePago } from "../../comprobantes_pagos/entities/comprobantes_pago.entity";
 
 @Entity()
 export class User {
@@ -15,7 +16,6 @@ export class User {
 
     @Column()
     segundo_nombre: string;
-
 
     @Column()
     primer_apellido: string;
@@ -40,6 +40,9 @@ export class User {
 
     @OneToMany(() => Frecuencia, frecuencia => frecuencia.conductor)
     frecuencias_conductor: Frecuencia[];
+
+    @OneToMany(() => ComprobantePago, comprobante => comprobante.usuario)
+    comprobantes: ComprobantePago[];
 
     @DeleteDateColumn()
     fecha_eliminacion: Date;

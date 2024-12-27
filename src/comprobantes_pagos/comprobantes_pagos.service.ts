@@ -5,12 +5,15 @@ import { ComprobantePago } from './entities/comprobantes_pago.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { User } from '../user/entities/user.entity';
 
 @Injectable()
 export class ComprobantesPagosService {
   constructor(
     @InjectRepository(ComprobantePago)
     private readonly comprobantePagoRepository: Repository<ComprobantePago>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     private readonly cloudinaryService: CloudinaryService,
   ) {}
 
@@ -20,6 +23,12 @@ export class ComprobantesPagosService {
    * @param file Archivo del comprobante.
    */
   async create(createComprobantesPagoDto: CreateComprobantesPagoDto, file: Express.Multer.File) {
+    // Verificar que el usuario exista
+    const usuario = await this.userRepository.findOneBy({ usuario_id: createComprobantesPagoDto.usuario_id });
+    if (!usuario) {
+      throw new NotFoundException(`No se encontró el usuario con ID ${createComprobantesPagoDto.usuario_id}`);
+    }
+
     const cloudinaryResponse = await this.cloudinaryService.upload(file);
     createComprobantesPagoDto.url_comprobante = cloudinaryResponse.secure_url;
     return this.comprobantePagoRepository.save(createComprobantesPagoDto);
@@ -29,7 +38,18 @@ export class ComprobantesPagosService {
    * Obtiene todos los comprobantes de pago.
    */
   async findAll() {
-    const comprobantes = await this.comprobantePagoRepository.find();
+    const comprobantes = await this.comprobantePagoRepository.find({
+      relations: {
+        usuario: true
+      },
+      select: {
+        usuario: {
+          primer_nombre: true,
+          primer_apellido: true
+        }
+      }
+    });
+    
     if (!comprobantes.length) {
       throw new NotFoundException('No se encontraron comprobantes de pago');
     }
@@ -41,7 +61,18 @@ export class ComprobantesPagosService {
    * @param id Identificador del comprobante.
    */
   async findOne(id: number) {
-    const comprobante = await this.comprobantePagoRepository.findOneBy({ comprobante_id: id });
+    const comprobante = await this.comprobantePagoRepository.findOne({
+      where: { comprobante_id: id },
+      relations: {
+        usuario: true
+      },
+      select: {
+        usuario: {
+          primer_nombre: true,
+          primer_apellido: true
+        }
+      }
+    });
     if (!comprobante) {
       throw new NotFoundException('No se encontró el comprobante de pago');
     }
@@ -51,21 +82,39 @@ export class ComprobantesPagosService {
   /**
    * Actualiza un comprobante de pago.
    * @param id Identificador del comprobante.
-   * @param updateComprobantesPagoDto Datos actualizados del comprobante.
+   * @param updateComprobantesPagoDto Datos actualizados del comprobante (solo estado, comentarios y url_comprobante).
    */
   async update(id: number, updateComprobantesPagoDto: UpdateComprobantesPagoDto) {
     const comprobante = await this.findOne(id);
+    
+    // Solo actualizamos los campos permitidos que vengan en el DTO
+    const updatedFields: Partial<ComprobantePago> = {};
+    
+    if (updateComprobantesPagoDto.estado !== undefined) {
+      updatedFields.estado = updateComprobantesPagoDto.estado;
+      updatedFields.fecha_revision = new Date();
+    }
+    
+    if (updateComprobantesPagoDto.comentarios !== undefined) {
+      updatedFields.comentarios = updateComprobantesPagoDto.comentarios;
+    }
+    
+    if (updateComprobantesPagoDto.url_comprobante !== undefined) {
+      updatedFields.url_comprobante = updateComprobantesPagoDto.url_comprobante;
+    }
 
-    const updatedFields = {
-      ...updateComprobantesPagoDto,
-      fecha_revision: updateComprobantesPagoDto.estado ? new Date() : comprobante.fecha_revision,
-    };
+    if (Object.keys(updatedFields).length === 0) {
+      return {
+        message: 'No se proporcionaron campos válidos para actualizar',
+        comprobante
+      };
+    }
 
     await this.comprobantePagoRepository.update(id, updatedFields);
 
     return {
       message: 'Comprobante de pago actualizado',
-      comprobante: await this.findOne(id),
+      comprobante: await this.findOne(id)
     };
   }
 
