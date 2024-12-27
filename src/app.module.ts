@@ -11,6 +11,7 @@ import { FrecuenciasModule } from './frecuencias/frecuencias.module';
 import { ParadasModule } from './paradas/paradas.module';
 import { RutasModule } from './rutas/rutas.module';
 import { ComprobantesPagosModule } from './comprobantes_pagos/comprobantes_pagos.module';
+import { BoletosModule } from './boletos/boletos.module';
 
 @Module({
   imports: [
@@ -39,7 +40,8 @@ import { ComprobantesPagosModule } from './comprobantes_pagos/comprobantes_pagos
     FrecuenciasModule,
     ParadasModule,
     RutasModule,
-    ComprobantesPagosModule
+    ComprobantesPagosModule,
+    BoletosModule
   ],
   controllers: [],
   providers: [],
