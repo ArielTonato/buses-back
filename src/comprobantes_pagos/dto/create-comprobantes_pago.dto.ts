@@ -1,5 +1,6 @@
 import { IsEnum, IsNumber, IsOptional, IsString } from "class-validator";
 import { Type } from "class-transformer";
+import { EstadoComprobante } from "src/common/enums/comprobantes.enum";
 
 export class CreateComprobantesPagoDto {
     @IsNumber()
@@ -14,8 +15,8 @@ export class CreateComprobantesPagoDto {
     @IsOptional()
     url_comprobante?: string;
 
-    @IsEnum(['pendiente', 'aceptado', 'rechazado'])
-    estado: 'pendiente' | 'aceptado' | 'rechazado';
+    @IsEnum(EstadoComprobante)
+    estado: EstadoComprobante;
 
     @IsString()
     @IsOptional()   

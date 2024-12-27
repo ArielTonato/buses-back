@@ -1,3 +1,4 @@
+import { EstadoComprobante } from 'src/common/enums/comprobantes.enum';
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
 
 @Entity('comprobante_pago')
@@ -16,10 +17,10 @@ export class ComprobantePago {
 
   @Column({
     type: 'enum',
-    enum: ['pendiente', 'aceptado', 'rechazado'],
-    default: 'pendiente'
+    enum: EstadoComprobante,
+    default: EstadoComprobante.PENDIENTE
   })
-  estado: 'pendiente' | 'aceptado' | 'rechazado';
+  estado: EstadoComprobante;
 
   @Column({ nullable: true })
   comentarios: string;

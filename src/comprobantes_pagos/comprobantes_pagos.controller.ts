@@ -21,7 +21,7 @@ export class ComprobantesPagosController {
           ],
           exceptionFactory: (errors) => {
             if (errors === "File is required") {
-              throw new NotFoundException('Se necesita al menos una imagen del bus');
+              throw new NotFoundException('Se necesita al menos una imagen del comprobante de pago');
             }
             throw new BadRequestException('El archivo debe ser una imagen en formato jpg, jpeg o png');
           }
