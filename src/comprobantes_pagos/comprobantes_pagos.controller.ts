@@ -37,6 +37,16 @@ export class ComprobantesPagosController {
     return this.comprobantesPagosService.findAll();
   }
 
+  @Get('user/:id')
+  findAllByUser(@Param('id') id: number) {
+    return this.comprobantesPagosService.findAllByUser(id);
+  }
+
+  @Get('total')
+  getTotal() {
+    return this.comprobantesPagosService.count();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.comprobantesPagosService.findOne(id);

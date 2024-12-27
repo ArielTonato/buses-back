@@ -16,6 +16,14 @@ Content-Type: application/json
 ###Obtener un comprobante de pago por ID
 GET http://localhost:3000/api/comprobantes-pagos/4
 
+
+###Obtener todos los comprobantes de pago de un usuario
+GET http://localhost:3000/api/comprobantes-pagos/user/17
+
+###Obtener la cantidad de comprobantes de pago en total
+GET http://localhost:3000/api/comprobantes-pagos/total
+
+
 ###Actualizar un comprobante de pago por ID
 ##Solo se de puede actualizar el estado y añadir comentarios
 PUT http://localhost:3000/api/comprobantes-pagos/4

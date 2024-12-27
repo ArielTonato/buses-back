@@ -127,4 +127,39 @@ export class ComprobantesPagosService {
     await this.comprobantePagoRepository.delete(id);
     return { message: 'Comprobante de pago eliminado correctamente' };
   }
+
+
+  /** 
+   * Obtiene todos los comprobantes de pago de un usuario.
+   * @param id Identificador del usuario.
+   */
+  async findAllByUser(id: number) {
+    const comprobantes = await this.comprobantePagoRepository.find({
+      where: { usuario_id: id },
+      relations: {
+        usuario: true
+      },
+      select: {
+        usuario: {
+          primer_nombre: true,
+          primer_apellido: true
+        }
+      }
+    });
+    
+    if (!comprobantes.length) {
+      throw new NotFoundException('No se encontraron comprobantes de pago para el usuario');
+    }
+    return comprobantes;
+  }
+
+  /**
+   *  Obtener la cantidad de comprobantes de pago en total.
+   */
+  async count() {
+    const count = await this.comprobantePagoRepository.count();
+    return {
+      cantidad: count
+    }
+  }
 }
