@@ -1,5 +1,6 @@
 import { EstadoBoleto, MetodoPago } from "src/common/enums/boletos.enum";
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { ComprobantePago } from "src/comprobantes_pagos/entities/comprobantes_pago.entity";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity("boletos")
 export class Boleto {
@@ -38,5 +39,7 @@ export class Boleto {
 
     @Column({type:"timestamp", default: () => "CURRENT_TIMESTAMP", onUpdate: "CURRENT_TIMESTAMP"})
     fecha_emision: Date
-    
+
+    @OneToMany(() => ComprobantePago, comprobante => comprobante.boleto)
+    comprobantes: ComprobantePago[]
 }

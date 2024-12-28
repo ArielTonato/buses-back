@@ -1,11 +1,16 @@
 import { EstadoComprobante } from 'src/common/enums/comprobantes.enum';
 import { User } from 'src/user/entities/user.entity';
+import { Boleto } from 'src/boletos/entities/boleto.entity';
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 
 @Entity('comprobante_pago')
 export class ComprobantePago {
   @PrimaryGeneratedColumn()
   comprobante_id: number;
+
+  @ManyToOne(() => Boleto, boleto => boleto.comprobantes)
+  @JoinColumn({ name: 'boleto_id' })
+  boleto: Boleto;
 
   @Column()
   boleto_id: number;

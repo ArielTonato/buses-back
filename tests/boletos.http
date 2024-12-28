@@ -1,4 +1,5 @@
 ###Crear boleto en teoria el boleto se crea con la reserva despues de que esta se confirma
+##Y todos los campos se llenan automaticamente con la informacion de la reserva
 POST http://localhost:3000/api/boletos
 Content-Type: application/json
 
