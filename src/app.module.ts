@@ -12,6 +12,7 @@ import { ParadasModule } from './paradas/paradas.module';
 import { RutasModule } from './rutas/rutas.module';
 import { ComprobantesPagosModule } from './comprobantes_pagos/comprobantes_pagos.module';
 import { BoletosModule } from './boletos/boletos.module';
+import { ReservaModule } from './reserva/reserva.module';
 
 @Module({
   imports: [
@@ -41,7 +42,8 @@ import { BoletosModule } from './boletos/boletos.module';
     ParadasModule,
     RutasModule,
     ComprobantesPagosModule,
-    BoletosModule
+    BoletosModule,
+    ReservaModule
   ],
   controllers: [],
   providers: [],
