@@ -1,21 +1,41 @@
 import { EstadoReserva } from "src/common/enums/reserva.enum";
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { User } from '../../user/entities/user.entity';
+import { Asiento } from '../../asientos/entities/asiento.entity';
+import { Frecuencia } from '../../frecuencias/entities/frecuencia.entity';
+import { Boleto } from '../../boletos/entities/boleto.entity';
+import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, CreateDateColumn } from "typeorm";
 
 @Entity("reservas")
 export class Reserva {
     @PrimaryGeneratedColumn()
     reserva_id: number
 
+    @ManyToOne(() => User, user => user.reservas)
+    @JoinColumn({ name: 'usuario_id' })
+    usuario: User;
+
     @Column()
     usuario_id: number
     
+    @ManyToOne(() => Asiento, asiento => asiento.reservas)
+    @JoinColumn({ name: 'asiento_id' })
+    asiento: Asiento;
+
     @Column()
     asiento_id: number
+
+    @ManyToOne(() => Frecuencia, frecuencia => frecuencia.reservas)
+    @JoinColumn({ name: 'frecuencia_id' })
+    frecuencia: Frecuencia;
 
     @Column()
     frecuencia_id: number
 
-    @Column()
+    @ManyToOne(() => Boleto, boleto => boleto.reservas)
+    @JoinColumn({ name: 'boleto_id' })
+    boleto: Boleto;
+
+    @Column({ nullable: true })
     boleto_id: number
 
     @Column()
@@ -33,7 +53,7 @@ export class Reserva {
     )
     estado: EstadoReserva
 
-    @Column({type:"timestamp", default: () => "CURRENT_TIMESTAMP", onUpdate: "CURRENT_TIMESTAMP"})
+    @CreateDateColumn()
     fecha_creacion: Date
 
     @Column()

@@ -1,5 +1,6 @@
 import { EstadoBoleto, MetodoPago } from "src/common/enums/boletos.enum";
 import { ComprobantePago } from "src/comprobantes_pagos/entities/comprobantes_pago.entity";
+import { Reserva } from "src/reserva/entities/reserva.entity";
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity("boletos")
@@ -30,6 +31,9 @@ export class Boleto {
         }
     )
     estado: EstadoBoleto
+
+    @OneToMany(() => Reserva, reserva => reserva.boleto)
+    reservas: Reserva[]
 
     @Column()
     url_imagen_qr: string

@@ -2,6 +2,7 @@ import { Roles } from "../../common/enums/roles.enum";
 import { Column, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Frecuencia } from "../../frecuencias/entities/frecuencia.entity";
 import { ComprobantePago } from "../../comprobantes_pagos/entities/comprobantes_pago.entity";
+import { Reserva } from "src/reserva/entities/reserva.entity";
 
 @Entity()
 export class User {
@@ -43,6 +44,9 @@ export class User {
 
     @OneToMany(() => ComprobantePago, comprobante => comprobante.usuario)
     comprobantes: ComprobantePago[];
+
+    @OneToMany(() => Reserva, reserva => reserva.usuario)
+    reservas: Reserva[];
 
     @DeleteDateColumn()
     fecha_eliminacion: Date;

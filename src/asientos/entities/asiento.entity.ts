@@ -1,6 +1,7 @@
 import { Bus } from "src/buses/entities/bus.entity";
 import { Asientos } from "src/common/enums/asientos.enum";
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Reserva } from "src/reserva/entities/reserva.entity";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class Asiento {
@@ -16,6 +17,9 @@ export class Asiento {
 
     @Column({type:"timestamp", default: () => "CURRENT_TIMESTAMP", onUpdate: "CURRENT_TIMESTAMP"})
     fecha_creacion: Date;
+
+    @OneToMany(() => Reserva, reserva => reserva.asiento)
+    reservas: Reserva[]
 
     @ManyToOne(() => Bus, bus => bus.asientos, { onDelete: 'CASCADE' })
     bus: Bus;
