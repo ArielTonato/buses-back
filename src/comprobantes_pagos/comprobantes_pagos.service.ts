@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { User } from '../user/entities/user.entity';
+import { Boleto } from 'src/boletos/entities/boleto.entity';
 
 @Injectable()
 export class ComprobantesPagosService {
@@ -14,6 +15,8 @@ export class ComprobantesPagosService {
     private readonly comprobantePagoRepository: Repository<ComprobantePago>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Boleto)
+    private readonly boletoRepository: Repository<Boleto>,
     private readonly cloudinaryService: CloudinaryService,
   ) {}
 
@@ -27,6 +30,12 @@ export class ComprobantesPagosService {
     const usuario = await this.userRepository.findOneBy({ usuario_id: createComprobantesPagoDto.usuario_id });
     if (!usuario) {
       throw new NotFoundException(`No se encontró el usuario con ID ${createComprobantesPagoDto.usuario_id}`);
+    }
+
+    // Verificar que el boleto exista
+    const boleto = await this.boletoRepository.findOneBy({ boleto_id: createComprobantesPagoDto.boleto_id });
+    if (!boleto) {
+      throw new NotFoundException(`No se encontró el boleto con ID ${createComprobantesPagoDto.boleto_id}`);
     }
 
     const cloudinaryResponse = await this.cloudinaryService.upload(file);

@@ -8,7 +8,7 @@ POST http://localhost:3000/api/comprobantes-pagos
 Content-Type: application/json
 
 {
-    "boleto_id": 1,
+    "boleto_id": 12,
     "usuario_id": 1,
     "estado": "pendiente"
 }
