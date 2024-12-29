@@ -1,7 +1,7 @@
 ###Obtener todas las reservas
 GET http://localhost:3000/api/reserva
 
-###Crear una reserva
+###Crear reserva 1
 POST http://localhost:3000/api/reserva
 Content-Type: application/json
 
@@ -9,7 +9,26 @@ Content-Type: application/json
     "usuario_id": 17,
     "asiento_id": 91,
     "frecuencia_id": 8,
-    "boleto_id": 1,
     "fecha_viaje": "2023-05-15",
-    "destino_reserva": "Riobamba"
+    "destino_reserva": "Quito"
+}
+
+###Crear reserva 2
+POST http://localhost:3000/api/reserva
+Content-Type: application/json
+
+{
+    "usuario_id": 17,
+    "asiento_id": 92,
+    "frecuencia_id": 8,
+    "fecha_viaje": "2023-05-15",
+    "destino_reserva": "Quito"
+}
+
+###Actualizar una reserva
+PUT http://localhost:3000/api/reserva/12
+Content-Type: application/json
+
+{
+    "estado": "confirmada"
 }

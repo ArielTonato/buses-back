@@ -15,9 +15,10 @@ export class CreateReservaDto {
     @Type(() => Number)
     frecuencia_id: number
 
+    @IsOptional()
     @IsNumber()
     @Type(() => Number)
-    boleto_id: number
+    boleto_id?: number
 
     @IsOptional()
     @IsString()

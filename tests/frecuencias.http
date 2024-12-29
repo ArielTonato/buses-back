@@ -44,18 +44,10 @@ DELETE http://localhost:3000/api/frecuencias/7
 
 
 ###Actualizar
-PUT http://localhost:3000/api/frecuencias/9
+PUT http://localhost:3000/api/frecuencias/8
 Content-Type: application/json
 
 {
-    "nombre_frecuencia": "Frecuencia 1",
-    "bus_id": 14,
-    "conductor_id": 18,
-    "hora_salida": "18:30:00",
-    "hora_llegada": "19:00:00",
-    "origen": "  ambato  ",
-    "destino": "  rioBamba  ",
-    "provincia": "Provincia",
-    "es_directo": true,
-    "total": 10
+    "provincia": "Pichincha"
+
 }
