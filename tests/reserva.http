@@ -26,7 +26,7 @@ Content-Type: application/json
 }
 
 ###Actualizar una reserva
-PUT http://localhost:3000/api/reserva/12
+PUT http://localhost:3000/api/reserva/18
 Content-Type: application/json
 
 {
