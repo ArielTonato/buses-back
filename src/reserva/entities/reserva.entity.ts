@@ -65,7 +65,7 @@ export class Reserva {
     @Column("float")
     precio: number
 
-    @Column()
+    @Column({ nullable: true })
     observacion: string
 
     @Column()
