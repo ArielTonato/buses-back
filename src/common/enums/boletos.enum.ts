@@ -5,6 +5,7 @@ export enum MetodoPago {
 }
 
 export enum EstadoBoleto {
+    PENDIENTE = 'pendiente',
     PAGADO = 'pagado',
     CANCELADO = 'cancelado'
 }

@@ -141,6 +141,23 @@ export class ReservaService {
     destinoReserva: string,
     asientoId: number
   ): Promise<void> {
+    // Verificar si el asiento ya está confirmado para esta frecuencia y fecha
+    const asientoConfirmado = await this.reservaRepository.findOne({
+      where: {
+        frecuencia_id: frecuenciaId,
+        fecha_viaje: fechaViaje,
+        asiento_id: asientoId,
+        estado: EstadoReserva.CONFIRMADA
+      }
+    });
+
+    if (asientoConfirmado) {
+      throw new ConflictException(
+        'Este asiento ya está confirmado para esta frecuencia y fecha'
+      );
+    }
+
+    // Verificar si el usuario ya tiene una reserva igual
     const reservaExistente = await this.reservaRepository.findOne({
       where: {
         usuario_id: usuarioId,
