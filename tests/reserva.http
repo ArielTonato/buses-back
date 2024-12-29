@@ -7,13 +7,9 @@ Content-Type: application/json
 
 {
     "usuario_id": 17,
-    "asiento_id": 51,
+    "asiento_id": 91,
     "frecuencia_id": 8,
     "boleto_id": 1,
-    "nombre_pasajero": "John Doe",
-    "identificacion_pasajero": "123456789",
     "fecha_viaje": "2023-05-15",
-    "hora_viaje": "10:00:00",
-    "precio": 100,
-    "destino_reserva": "New York"
+    "destino_reserva": "Riobamba"
 }
