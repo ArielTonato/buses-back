@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { CreateReservaDto } from './dto/create-reserva.dto';
 import { UpdateReservaDto } from './dto/update-reserva.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -134,7 +134,39 @@ export class ReservaService {
     return this.boletoRepository.save(boleto);
   }
 
+  private async validarReservaExistente(
+    usuarioId: number,
+    frecuenciaId: number,
+    fechaViaje: Date,
+    destinoReserva: string,
+    asientoId: number
+  ): Promise<void> {
+    const reservaExistente = await this.reservaRepository.findOne({
+      where: {
+        usuario_id: usuarioId,
+        frecuencia_id: frecuenciaId,
+        fecha_viaje: fechaViaje,
+        destino_reserva: destinoReserva,
+        asiento_id: asientoId
+      }
+    });
+
+    if (reservaExistente) {
+      throw new ConflictException(
+        'Ya existe una reserva para este usuario con el mismo destino, fecha, frecuencia y asiento'
+      );
+    }
+  }
+
   async create(createReservaDto: CreateReservaDto): Promise<Reserva> {
+    await this.validarReservaExistente(
+      createReservaDto.usuario_id,
+      createReservaDto.frecuencia_id,
+      createReservaDto.fecha_viaje,
+      createReservaDto.destino_reserva,
+      createReservaDto.asiento_id
+    );
+
     const usuario = await this.userRepository.findOne({ where: { usuario_id: createReservaDto.usuario_id } });
 
     if (!usuario) {
