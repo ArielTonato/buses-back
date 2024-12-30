@@ -35,4 +35,4 @@ Content-Type: application/json
 }
 
 ###Cancelar una reserva
-DELETE http://localhost:3000/api/reserva/61
+DELETE http://localhost:3000/api/reserva/65

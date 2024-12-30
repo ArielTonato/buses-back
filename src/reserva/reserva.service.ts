@@ -180,6 +180,12 @@ export class ReservaService {
           }
         }
       }
+
+      // Enviar correo de confirmación de cancelación
+      const usuario = await this.userRepository.findOne({ where: { usuario_id: reserva.usuario_id } });
+      if (usuario) {
+        await this.mailService.sendReservationCancellation(usuario.correo, reserva);
+      }
       
       return reserva;
     }

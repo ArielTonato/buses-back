@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
+import { readFile } from 'fs/promises';
+import { join } from 'path';
+import { format } from 'date-fns';
+import * as handlebars from 'handlebars';
 
 @Injectable()
 export class MailService {
@@ -52,5 +56,48 @@ export class MailService {
     } catch (error) {
       console.error('Error sending email:', error);
     }
+  }
+
+  async sendReservationCancellation(
+    email: string,
+    reserva: any
+  ): Promise<void> {
+    // Formatear las fechas de manera segura
+    const formatDate = (date: string | Date) => {
+      try {
+        if (typeof date === 'string') {
+          return format(new Date(date), 'dd/MM/yyyy');
+        }
+        return format(date, 'dd/MM/yyyy');
+      } catch (error) {
+        return 'Fecha no disponible';
+      }
+    };
+
+    const formatTime = (time: string | Date) => {
+      try {
+        if (typeof time === 'string') {
+          return format(new Date(time), 'HH:mm');
+        }
+        return format(time, 'HH:mm');
+      } catch (error) {
+        return 'Hora no disponible';
+      }
+    };
+
+    await this.mailerService.sendMail({
+      to: email,
+      subject: 'Confirmación de Cancelación de Reserva',
+      template: './cancellation',
+      context: {
+        nombre_pasajero: reserva.nombre_pasajero,
+        reserva_id: reserva.reserva_id,
+        fecha_viaje: formatDate(reserva.fecha_viaje),
+        destino_reserva: reserva.destino_reserva,
+        numero_asiento: reserva.asiento.numero_asiento,
+        metodo_pago: reserva.metodo_pago,
+        precio: reserva.precio.toFixed(2)
+      },
+    });
   }
 }
