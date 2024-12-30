@@ -14,6 +14,7 @@ import { EstadoReserva, MetodoPago } from '../common/enums/reserva.enum';
 import { EstadoBoleto } from '../common/enums/boletos.enum';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import * as QRCode from 'qrcode';
+import { MailService } from 'src/mail/mail.service';
 
 interface QRCodeData {
   total: number;
@@ -39,6 +40,7 @@ export class ReservaService {
     @InjectRepository(Boleto)
     private readonly boletoRepository: Repository<Boleto>,
     private readonly cloudinaryService: CloudinaryService,
+    private readonly mailService: MailService,
   ) { }
 
   async create(createReservaDto: CreateReservaDto): Promise<Reserva> {
@@ -61,6 +63,14 @@ export class ReservaService {
     if (reservaGuardada.boleto_id) {
       await this.actualizarBoleto(reservaGuardada.boleto_id);
     }
+
+    await this.mailService.sendReservationConfirmation(
+      usuario.correo,
+      {
+        name: reservaGuardada.nombre_pasajero,
+        reservationId: reservaGuardada.boleto_id
+      }
+    );
 
     return reservaGuardada;
   }

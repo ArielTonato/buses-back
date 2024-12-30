@@ -13,6 +13,7 @@ import { RutasModule } from './rutas/rutas.module';
 import { ComprobantesPagosModule } from './comprobantes_pagos/comprobantes_pagos.module';
 import { BoletosModule } from './boletos/boletos.module';
 import { ReservaModule } from './reserva/reserva.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -43,7 +44,8 @@ import { ReservaModule } from './reserva/reserva.module';
     RutasModule,
     ComprobantesPagosModule,
     BoletosModule,
-    ReservaModule
+    ReservaModule,
+    MailModule
   ],
   controllers: [],
   providers: [],

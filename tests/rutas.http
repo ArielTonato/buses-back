@@ -16,9 +16,9 @@ POST http://localhost:3000/api/rutas
 Content-Type: application/json
 
 {
-    "frecuencia_id": 9,
-    "parada_id": 30,
-    "orden": 2,
+    "frecuencia_id": 12,
+    "parada_id": 33,
+    "orden": 1,
     "distancia_parada": 45,
     "precio_parada": 1.2,
     "tiempo_parada": "18:55:00"

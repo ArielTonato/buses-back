@@ -9,11 +9,13 @@ import { Asiento } from '../asientos/entities/asiento.entity';
 import { Ruta } from '../rutas/entities/ruta.entity';
 import { Boleto } from '../boletos/entities/boleto.entity';
 import { CloudinaryModule } from '../cloudinary/cloudinary.module';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Reserva, User, Frecuencia, Asiento, Ruta, Boleto]),
-    CloudinaryModule
+    CloudinaryModule,
+    MailModule
   ],
   controllers: [ReservaController],
   providers: [ReservaService]

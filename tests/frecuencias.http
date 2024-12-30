@@ -28,8 +28,8 @@ Content-Type: application/json
 
 {
     "nombre_frecuencia": "Ambato - Riobamba",
-    "bus_id": 10,
-    "conductor_id": 19,
+    "bus_id": 14,
+    "conductor_id": 38,
     "hora_salida": "18:30:00",
     "hora_llegada": "19:00:00",
     "origen": "Origen",
@@ -44,10 +44,13 @@ DELETE http://localhost:3000/api/frecuencias/7
 
 
 ###Actualizar
-PUT http://localhost:3000/api/frecuencias/8
+PUT http://localhost:3000/api/frecuencias/12
 Content-Type: application/json
 
 {
+    "es_directo": false,
+    "origen": "Ambato",
+    "destino": "Quito",
     "provincia": "Pichincha"
 
 }
