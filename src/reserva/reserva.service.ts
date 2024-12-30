@@ -1,19 +1,27 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateReservaDto } from './dto/create-reserva.dto';
 import { UpdateReservaDto } from './dto/update-reserva.dto';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Reserva } from './entities/reserva.entity';
-import { Repository } from 'typeorm';
 import { User } from '../user/entities/user.entity';
 import { Frecuencia } from '../frecuencias/entities/frecuencia.entity';
 import { Asiento } from '../asientos/entities/asiento.entity';
 import { Ruta } from '../rutas/entities/ruta.entity';
-import { Asientos } from '../common/enums/asientos.enum';
 import { Boleto } from '../boletos/entities/boleto.entity';
-import { EstadoReserva } from '../common/enums/reserva.enum';
+import { Asientos } from '../common/enums/asientos.enum';
+import { EstadoReserva, MetodoPago } from '../common/enums/reserva.enum';
 import { EstadoBoleto } from '../common/enums/boletos.enum';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import * as QRCode from 'qrcode';
+
+interface QRCodeData {
+  total: number;
+  cantidad_asientos: number;
+  estado: EstadoBoleto;
+  asientos: string;
+  mensaje?: string;
+}
 
 @Injectable()
 export class ReservaService {
@@ -33,22 +41,248 @@ export class ReservaService {
     private readonly cloudinaryService: CloudinaryService,
   ) { }
 
+  async create(createReservaDto: CreateReservaDto): Promise<Reserva> {
+    await this.validateReservationCreation(createReservaDto);
+
+    const [usuario, frecuencia] = await Promise.all([
+      this.findUserById(createReservaDto.usuario_id),
+      this.findFrecuenciaById(createReservaDto.frecuencia_id)
+    ]);
+
+    const precio = await this.calcularPrecio(
+      createReservaDto.destino_reserva,
+      createReservaDto.frecuencia_id,
+      createReservaDto.asiento_id
+    );
+
+    const reserva = await this.createReservaEntity(createReservaDto, usuario, frecuencia, precio);
+    const reservaGuardada = await this.reservaRepository.save(reserva);
+
+    if (reservaGuardada.boleto_id) {
+      await this.actualizarBoleto(reservaGuardada.boleto_id);
+    }
+
+    return reservaGuardada;
+  }
+
+  async update(id: number, updateReservaDto: UpdateReservaDto): Promise<Reserva> {
+    const reserva = await this.findOne(id);
+    const estadoAnterior = reserva.estado;
+
+    await this.updateReservaDetails(reserva, updateReservaDto);
+
+    if (this.shouldCreateBoleto(estadoAnterior, reserva.estado)) {
+      await this.handleBoletoCreation(reserva);
+    }
+
+    const reservaActualizada = await this.reservaRepository.save(reserva);
+
+    if (reservaActualizada.boleto_id) {
+      await this.actualizarBoleto(reservaActualizada.boleto_id);
+    }
+
+    return reservaActualizada;
+  }
+
+  async findOne(id: number): Promise<Reserva> {
+    const reserva = await this.reservaRepository.findOne({
+      where: { reserva_id: id },
+      relations: ['boleto']
+    });
+
+    if (!reserva) {
+      throw new NotFoundException(`Reserva con ID ${id} no encontrada`);
+    }
+
+    return reserva;
+  }
+
+  async findAll(): Promise<Reserva[]> {
+    return this.reservaRepository.find({
+      relations: { boleto: true },
+      order: { fecha_viaje: 'DESC' }
+    });
+  }
+
+  async remove(id: number): Promise<Reserva> {
+    const reserva = await this.findOne(id);
+    return this.reservaRepository.remove(reserva);
+  }
+
   private async calcularPrecio(destinoReserva: string, frecuenciaId: number, asientoId: number): Promise<number> {
+    const [frecuencia, asiento] = await Promise.all([
+      this.findFrecuenciaWithRutas(frecuenciaId),
+      this.findAsientoById(asientoId)
+    ]);
+
+    const precioBase = this.calcularPrecioBase(destinoReserva, frecuencia);
+    return this.aplicarTarifaAsiento(precioBase, asiento.tipo_asiento);
+  }
+
+  private async validateReservationCreation(createReservaDto: CreateReservaDto): Promise<void> {
+    const [asientoConfirmado, reservaExistente] = await Promise.all([
+      this.checkAsientoConfirmado(createReservaDto),
+      this.checkReservaExistente(createReservaDto)
+    ]);
+
+    if (asientoConfirmado) {
+      throw new ConflictException('Este asiento ya está confirmado para esta frecuencia y fecha');
+    }
+
+    if (reservaExistente) {
+      throw new ConflictException(
+        'Ya existe una reserva para este usuario con el mismo destino, fecha, frecuencia y asiento'
+      );
+    }
+  }
+
+  private async createReservaEntity(
+    dto: CreateReservaDto,
+    usuario: User,
+    frecuencia: Frecuencia,
+    precio: number
+  ): Promise<Reserva> {
+    const reserva = this.reservaRepository.create({
+      ...dto,
+      nombre_pasajero: this.formatNombrePasajero(usuario),
+      identificacion_pasajero: usuario.identificacion,
+      hora_viaje: frecuencia.hora_salida,
+      precio,
+      estado: this.determinarEstadoInicial(dto.metodo_pago, dto.estado)
+    });
+
+    if (this.shouldCreateBoletoForReserva(reserva)) {
+      const boletoExistente = await this.buscarBoletoExistente(
+        reserva.usuario_id,
+        reserva.frecuencia_id,
+        reserva.fecha_viaje,
+        reserva.destino_reserva
+      );
+
+      reserva.boleto_id = boletoExistente?.boleto_id || (await this.crearNuevoBoleto(reserva)).boleto_id;
+    }
+
+    return reserva;
+  }
+
+  private async actualizarBoleto(boletoId: number): Promise<void> {
+    const boleto = await this.boletoRepository.findOne({
+      where: { boleto_id: boletoId },
+      relations: ['reservas']
+    });
+
+    if (!boleto) return;
+
+    const numerosAsientos = await this.obtenerNumerosAsientos(boleto.reservas);
+    const hayReservaPorDeposito = this.tieneReservaPorDeposito(boleto.reservas);
+
+    const qrData = await this.generarQRData(boleto, numerosAsientos, hayReservaPorDeposito);
+    const uploadResult = await this.generarYSubirQR(qrData);
+
+    await this.actualizarDatosBoleto(boleto, numerosAsientos, hayReservaPorDeposito, uploadResult.secure_url);
+  }
+
+  private formatNombrePasajero(usuario: User): string {
+    return `${usuario.primer_nombre} ${usuario.segundo_nombre}`.trim();
+  }
+
+  private determinarEstadoInicial(metodoPago: MetodoPago, estado?: EstadoReserva): EstadoReserva {
+    if (metodoPago === MetodoPago.PRESENCIAL) {
+      return EstadoReserva.CONFIRMADA;
+    }
+    if (metodoPago === MetodoPago.DEPOSITO) {
+      return EstadoReserva.PENDIENTE;
+    }
+    return estado || EstadoReserva.PENDIENTE;
+  }
+
+  private shouldCreateBoletoForReserva(reserva: Reserva): boolean {
+    return reserva.metodo_pago === MetodoPago.DEPOSITO || 
+           reserva.metodo_pago === MetodoPago.PRESENCIAL || 
+           reserva.estado === EstadoReserva.CONFIRMADA;
+  }
+
+  private shouldCreateBoleto(estadoAnterior: EstadoReserva, estadoNuevo: EstadoReserva): boolean {
+    return estadoAnterior !== EstadoReserva.CONFIRMADA && estadoNuevo === EstadoReserva.CONFIRMADA;
+  }
+
+  private async generarQRData(boleto: Boleto, asientos: string, hayReservaPorDeposito: boolean): Promise<QRCodeData> {
+    const esPagoPresencial = boleto.reservas.some(reserva => reserva.metodo_pago === MetodoPago.PRESENCIAL);
+
+    return {
+      total: boleto.reservas.reduce((sum, reserva) => sum + reserva.precio, 0),
+      cantidad_asientos: boleto.reservas.length,
+      estado: hayReservaPorDeposito ? EstadoBoleto.PENDIENTE : EstadoBoleto.PAGADO,
+      asientos,
+      mensaje: hayReservaPorDeposito ? 'NO VÁLIDO - PENDIENTE DE PAGO' : 
+               esPagoPresencial ? 'VÁLIDO - PAGO PRESENCIAL' : undefined
+    };
+  }
+
+  private async generarYSubirQR(qrData: QRCodeData) {
+    const qrBuffer = await QRCode.toBuffer(JSON.stringify(qrData));
+    return this.cloudinaryService.uploadBuffer(qrBuffer, 'boletos');
+  }
+
+  private tieneReservaPorDeposito(reservas: Reserva[]): boolean {
+    return reservas.some(reserva => reserva.metodo_pago === MetodoPago.DEPOSITO);
+  }
+
+  private async actualizarDatosBoleto(
+    boleto: Boleto,
+    asientos: string,
+    hayReservaPorDeposito: boolean,
+    urlImagenQR: string
+  ): Promise<void> {
+    Object.assign(boleto, {
+      asientos,
+      cantidad_asientos: boleto.reservas.length,
+      total: boleto.reservas.reduce((sum, reserva) => sum + reserva.precio, 0),
+      estado: hayReservaPorDeposito ? EstadoBoleto.PENDIENTE : EstadoBoleto.PAGADO,
+      url_imagen_qr: urlImagenQR
+    });
+
+    await this.boletoRepository.save(boleto);
+  }
+
+  private async findUserById(userId: number): Promise<User> {
+    const usuario = await this.userRepository.findOne({ where: { usuario_id: userId } });
+    if (!usuario) {
+      throw new NotFoundException(`Usuario con ID ${userId} no encontrado`);
+    }
+    return usuario;
+  }
+
+  private async findFrecuenciaById(frecuenciaId: number): Promise<Frecuencia> {
+    const frecuencia = await this.frecuenciaRepository.findOne({
+      where: { frecuencia_id: frecuenciaId }
+    });
+    if (!frecuencia) {
+      throw new NotFoundException(`Frecuencia con ID ${frecuenciaId} no encontrada`);
+    }
+    return frecuencia;
+  }
+
+  private async findFrecuenciaWithRutas(frecuenciaId: number): Promise<Frecuencia> {
     const frecuencia = await this.frecuenciaRepository.findOne({
       where: { frecuencia_id: frecuenciaId },
       relations: { rutas: { parada: true } },
     });
-
     if (!frecuencia) {
       throw new NotFoundException(`Frecuencia con ID ${frecuenciaId} no encontrada`);
     }
+    return frecuencia;
+  }
 
+  private async findAsientoById(asientoId: number): Promise<Asiento> {
     const asiento = await this.asientoRepository.findOne({ where: { asiento_id: asientoId } });
-
     if (!asiento) {
       throw new NotFoundException(`Asiento con ID ${asientoId} no encontrado`);
     }
+    return asiento;
+  }
 
+  private calcularPrecioBase(destinoReserva: string, frecuencia: Frecuencia): number {
     const precioBase = destinoReserva === frecuencia.destino
       ? frecuencia.total
       : frecuencia.rutas.find(r => r.parada.ciudad === destinoReserva)?.precio_parada;
@@ -57,7 +291,74 @@ export class ReservaService {
       throw new NotFoundException(`Destino ${destinoReserva} no encontrado en la ruta`);
     }
 
-    return asiento.tipo_asiento === Asientos.VIP ? precioBase * 1.4 : precioBase;
+    return precioBase;
+  }
+
+  private aplicarTarifaAsiento(precioBase: number, tipoAsiento: Asientos): number {
+    return tipoAsiento === Asientos.VIP ? precioBase * 1.4 : precioBase;
+  }
+
+  private async obtenerNumerosAsientos(reservas: Reserva[]): Promise<string> {
+    const numerosAsientos = await Promise.all(
+      reservas.map(async reserva => {
+        const asiento = await this.asientoRepository.findOne({
+          where: { asiento_id: reserva.asiento_id }
+        });
+        return asiento.numero_asiento;
+      })
+    );
+    return numerosAsientos.sort((a, b) => a - b).join(',');
+  }
+
+  private async checkAsientoConfirmado(dto: CreateReservaDto): Promise<boolean> {
+    const asientoConfirmado = await this.reservaRepository.findOne({
+      where: {
+        frecuencia_id: dto.frecuencia_id,
+        fecha_viaje: dto.fecha_viaje,
+        asiento_id: dto.asiento_id,
+        estado: EstadoReserva.CONFIRMADA
+      }
+    });
+    return !!asientoConfirmado;
+  }
+
+  private async checkReservaExistente(dto: CreateReservaDto): Promise<boolean> {
+    const reservaExistente = await this.reservaRepository.findOne({
+      where: {
+        usuario_id: dto.usuario_id,
+        frecuencia_id: dto.frecuencia_id,
+        fecha_viaje: dto.fecha_viaje,
+        destino_reserva: dto.destino_reserva,
+        asiento_id: dto.asiento_id
+      }
+    });
+    return !!reservaExistente;
+  }
+
+  private async updateReservaDetails(reserva: Reserva, updateDto: UpdateReservaDto): Promise<void> {
+    if (updateDto.usuario_id) {
+      const usuario = await this.findUserById(updateDto.usuario_id);
+      reserva.nombre_pasajero = this.formatNombrePasajero(usuario);
+      reserva.identificacion_pasajero = usuario.identificacion;
+    }
+
+    if (updateDto.frecuencia_id) {
+      const frecuencia = await this.findFrecuenciaById(updateDto.frecuencia_id);
+      reserva.hora_viaje = frecuencia.hora_salida;
+    }
+
+    Object.assign(reserva, updateDto);
+  }
+
+  private async handleBoletoCreation(reserva: Reserva): Promise<void> {
+    const boletoExistente = await this.buscarBoletoExistente(
+      reserva.usuario_id,
+      reserva.frecuencia_id,
+      reserva.fecha_viaje,
+      reserva.destino_reserva
+    );
+
+    reserva.boleto_id = boletoExistente?.boleto_id || (await this.crearNuevoBoleto(reserva)).boleto_id;
   }
 
   private async buscarBoletoExistente(
@@ -80,45 +381,14 @@ export class ReservaService {
     return reservaExistente?.boleto || null;
   }
 
-  private async actualizarBoleto(boletoId: number): Promise<void> {
-    const boleto = await this.boletoRepository.findOne({ where: { boleto_id: boletoId }, relations: ['reservas'] });
-
-    if (!boleto) return;
-
-    const numerosAsientos = await Promise.all(
-      boleto.reservas.map(async reserva => {
-        const asiento = await this.asientoRepository.findOne({ where: { asiento_id: reserva.asiento_id } });
-        return asiento.numero_asiento;
-      })
-    );
-
-    boleto.asientos = numerosAsientos.sort((a, b) => a - b).join(',');
-    boleto.cantidad_asientos = boleto.reservas.length;
-    boleto.total = boleto.reservas.reduce((sum, reserva) => sum + reserva.precio, 0);
-
-    const qrData = {
-      total: boleto.total,
-      cantidad_asientos: boleto.cantidad_asientos,
-      estado: boleto.estado,
-      asientos: boleto.asientos,
-    };
-
-    const qrBuffer = await QRCode.toBuffer(JSON.stringify(qrData));
-    const uploadResult = await this.cloudinaryService.uploadBuffer(qrBuffer, 'boletos');
-
-    boleto.url_imagen_qr = uploadResult.secure_url;
-    await this.boletoRepository.save(boleto);
-  }
-
   private async crearNuevoBoleto(reserva: Reserva): Promise<Boleto> {
-    const asiento = await this.asientoRepository.findOne({ where: { asiento_id: reserva.asiento_id } });
-
-    const qrData = {
+    const asiento = await this.findAsientoById(reserva.asiento_id);
+    const qrData = await this.generarQRData({
       total: reserva.precio,
       cantidad_asientos: 1,
-      estado: EstadoBoleto.PAGADO,
       asientos: asiento.numero_asiento.toString(),
-    };
+      reservas: [reserva]
+    } as Boleto, asiento.numero_asiento.toString(), reserva.metodo_pago === MetodoPago.DEPOSITO);
 
     const qrBuffer = await QRCode.toBuffer(JSON.stringify(qrData));
     const uploadResult = await this.cloudinaryService.uploadBuffer(qrBuffer, 'boletos');
@@ -126,174 +396,11 @@ export class ReservaService {
     const boleto = this.boletoRepository.create({
       total: reserva.precio,
       cantidad_asientos: 1,
-      estado: EstadoBoleto.PAGADO,
+      estado: reserva.metodo_pago === MetodoPago.DEPOSITO ? EstadoBoleto.PENDIENTE : EstadoBoleto.PAGADO,
       asientos: asiento.numero_asiento.toString(),
       url_imagen_qr: uploadResult.secure_url,
     });
 
     return this.boletoRepository.save(boleto);
   }
-
-  private async validarReservaExistente(
-    usuarioId: number,
-    frecuenciaId: number,
-    fechaViaje: Date,
-    destinoReserva: string,
-    asientoId: number
-  ): Promise<void> {
-    // Verificar si el asiento ya está confirmado para esta frecuencia y fecha
-    const asientoConfirmado = await this.reservaRepository.findOne({
-      where: {
-        frecuencia_id: frecuenciaId,
-        fecha_viaje: fechaViaje,
-        asiento_id: asientoId,
-        estado: EstadoReserva.CONFIRMADA
-      }
-    });
-
-    if (asientoConfirmado) {
-      throw new ConflictException(
-        'Este asiento ya está confirmado para esta frecuencia y fecha'
-      );
-    }
-
-    // Verificar si el usuario ya tiene una reserva igual
-    const reservaExistente = await this.reservaRepository.findOne({
-      where: {
-        usuario_id: usuarioId,
-        frecuencia_id: frecuenciaId,
-        fecha_viaje: fechaViaje,
-        destino_reserva: destinoReserva,
-        asiento_id: asientoId
-      }
-    });
-
-    if (reservaExistente) {
-      throw new ConflictException(
-        'Ya existe una reserva para este usuario con el mismo destino, fecha, frecuencia y asiento'
-      );
-    }
-  }
-
-  async create(createReservaDto: CreateReservaDto): Promise<Reserva> {
-    await this.validarReservaExistente(
-      createReservaDto.usuario_id,
-      createReservaDto.frecuencia_id,
-      createReservaDto.fecha_viaje,
-      createReservaDto.destino_reserva,
-      createReservaDto.asiento_id
-    );
-
-    const usuario = await this.userRepository.findOne({ where: { usuario_id: createReservaDto.usuario_id } });
-
-    if (!usuario) {
-      throw new NotFoundException(`Usuario con ID ${createReservaDto.usuario_id} no encontrado`);
-    }
-
-    const frecuencia = await this.frecuenciaRepository.findOne({ where: { frecuencia_id: createReservaDto.frecuencia_id } });
-
-    if (!frecuencia) {
-      throw new NotFoundException(`Frecuencia con ID ${createReservaDto.frecuencia_id} no encontrada`);
-    }
-
-    const precio = await this.calcularPrecio(
-      createReservaDto.destino_reserva,
-      createReservaDto.frecuencia_id,
-      createReservaDto.asiento_id
-    );
-
-    const reserva = this.reservaRepository.create({
-      ...createReservaDto,
-      nombre_pasajero: `${usuario.primer_nombre} ${usuario.segundo_nombre}`.trim(),
-      identificacion_pasajero: usuario.identificacion,
-      hora_viaje: frecuencia.hora_salida,
-      precio,
-    });
-
-    if (reserva.estado === EstadoReserva.CONFIRMADA) {
-      const boletoExistente = await this.buscarBoletoExistente(
-        reserva.usuario_id,
-        reserva.frecuencia_id,
-        reserva.fecha_viaje,
-        reserva.destino_reserva
-      );
-
-      reserva.boleto_id = boletoExistente?.boleto_id || (await this.crearNuevoBoleto(reserva)).boleto_id;
-    }
-
-    const reservaGuardada = await this.reservaRepository.save(reserva);
-
-    if (reservaGuardada.boleto_id) {
-      await this.actualizarBoleto(reservaGuardada.boleto_id);
-    }
-
-    return reservaGuardada;
-  }
-
-  async update(id: number, updateReservaDto: UpdateReservaDto): Promise<Reserva> {
-    const reserva = await this.findOne(id);
-    const estadoAnterior = reserva.estado;
-
-    if (updateReservaDto.usuario_id) {
-      const usuario = await this.userRepository.findOne({ where: { usuario_id: updateReservaDto.usuario_id } });
-
-      if (!usuario) {
-        throw new NotFoundException(`Usuario con ID ${updateReservaDto.usuario_id} no encontrado`);
-      }
-
-      reserva.nombre_pasajero = `${usuario.primer_nombre} ${usuario.segundo_nombre}`.trim();
-      reserva.identificacion_pasajero = usuario.identificacion;
-    }
-
-    if (updateReservaDto.frecuencia_id) {
-      const frecuencia = await this.frecuenciaRepository.findOne({ where: { frecuencia_id: updateReservaDto.frecuencia_id } });
-
-      if (!frecuencia) {
-        throw new NotFoundException(`Frecuencia con ID ${updateReservaDto.frecuencia_id} no encontrada`);
-      }
-
-      reserva.hora_viaje = frecuencia.hora_salida;
-    }
-
-    Object.assign(reserva, updateReservaDto);
-
-    if (estadoAnterior !== EstadoReserva.CONFIRMADA && reserva.estado === EstadoReserva.CONFIRMADA) {
-      const boletoExistente = await this.buscarBoletoExistente(
-        reserva.usuario_id,
-        reserva.frecuencia_id,
-        reserva.fecha_viaje,
-        reserva.destino_reserva
-      );
-
-      reserva.boleto_id = boletoExistente?.boleto_id || (await this.crearNuevoBoleto(reserva)).boleto_id;
-    }
-
-    const reservaActualizada = await this.reservaRepository.save(reserva);
-
-    if (reservaActualizada.boleto_id) {
-      await this.actualizarBoleto(reservaActualizada.boleto_id);
-    }
-
-    return reservaActualizada;
-  }
-
-  async findOne(id: number): Promise<Reserva> {
-    const reserva = await this.reservaRepository.findOne({ where: { reserva_id: id } });
-
-    if (!reserva) {
-      throw new NotFoundException(`Reserva con ID ${id} no encontrada`);
-    }
-
-    return reserva;
-  }
-
-  async findAll(): Promise<Reserva[]> {
-    return this.reservaRepository.find({ relations: { boleto: true } });
-  }
-
-  async remove(id: number): Promise<Reserva> {
-    const reserva = await this.findOne(id);
-    return this.reservaRepository.remove(reserva);
-  }
-
 }

@@ -1,6 +1,6 @@
 import { IsDate, IsEnum, IsNumber, IsOptional, IsString } from "class-validator";
 import { Type } from "class-transformer";
-import { EstadoReserva } from "src/common/enums/reserva.enum";
+import { EstadoReserva, MetodoPago } from "src/common/enums/reserva.enum";
 
 export class CreateReservaDto {
     @IsNumber()
@@ -23,6 +23,10 @@ export class CreateReservaDto {
     @IsOptional()
     @IsString()
     nombre_pasajero?: string
+
+    @IsEnum(MetodoPago)
+    @IsOptional()
+    metodo_pago: MetodoPago = MetodoPago.PRESENCIAL
 
     @IsOptional()
     @IsString()

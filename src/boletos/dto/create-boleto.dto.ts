@@ -1,5 +1,5 @@
 import { IsEnum, IsNumber, IsOptional, IsString } from "class-validator";
-import { EstadoBoleto, MetodoPago } from "src/common/enums/boletos.enum";
+import { EstadoBoleto } from "src/common/enums/boletos.enum";
 
 export class CreateBoletoDto {
     @IsNumber()
@@ -10,9 +10,6 @@ export class CreateBoletoDto {
     @IsOptional()
     cantidad_asientos?: number
 
-    @IsOptional()
-    @IsEnum(MetodoPago)
-    metodo_pago?: MetodoPago
 
     @IsOptional()
     @IsEnum(EstadoBoleto)

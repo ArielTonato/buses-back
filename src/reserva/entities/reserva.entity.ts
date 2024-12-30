@@ -1,4 +1,4 @@
-import { EstadoReserva } from "src/common/enums/reserva.enum";
+import { EstadoReserva, MetodoPago } from "src/common/enums/reserva.enum";
 import { User } from '../../user/entities/user.entity';
 import { Asiento } from '../../asientos/entities/asiento.entity';
 import { Frecuencia } from '../../frecuencias/entities/frecuencia.entity';
@@ -37,6 +37,15 @@ export class Reserva {
 
     @Column({ nullable: true })
     boleto_id: number
+
+    @Column(
+        {
+            type: 'enum',
+            enum: MetodoPago,
+            default: MetodoPago.PRESENCIAL
+        }
+    )
+    metodo_pago: MetodoPago
 
     @Column()
     nombre_pasajero: string 

@@ -1,4 +1,4 @@
-import { EstadoBoleto, MetodoPago } from "src/common/enums/boletos.enum";
+import { EstadoBoleto } from "src/common/enums/boletos.enum";
 import { ComprobantePago } from "src/comprobantes_pagos/entities/comprobantes_pago.entity";
 import { Reserva } from "src/reserva/entities/reserva.entity";
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
@@ -14,14 +14,7 @@ export class Boleto {
     @Column()
     cantidad_asientos: number
 
-    @Column(
-        {
-            type: 'enum',
-            enum: MetodoPago,
-            default: MetodoPago.PRESENCIAL
-        }
-    )
-    metodo_pago: MetodoPago
+
 
     @Column(
         {
