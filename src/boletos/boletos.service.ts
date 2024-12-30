@@ -6,6 +6,8 @@ import { Boleto } from './entities/boleto.entity';
 import { Repository } from 'typeorm';
 import * as QRCode from 'qrcode';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { EstadoReserva } from '../common/enums/reserva.enum';
+import { EstadoBoleto } from 'src/common/enums/boletos.enum';
 
 @Injectable()
 export class BoletosService {
@@ -48,7 +50,8 @@ export class BoletosService {
 
   async findOne(id: number) {
     const boleto = await this.boletoRepository.findOne({
-      where: { boleto_id: id }
+      where: { boleto_id: id },
+      relations: ['reservas', 'reservas.asiento']
     });
     if(!boleto){
       throw new NotFoundException('No se encontro el boleto');
@@ -60,11 +63,50 @@ export class BoletosService {
     return `This action updates a #${id} boleto`;
   }
 
-  remove(id: number) {
-    //El boleto se elimina cuando se elimina la reserva
-    //El boleto cuando se cancela  libera los asientos
-    //Solo se puede eliminar el boleto si es un dia antes de la fecha de viaje de reserva 
-    //Un boleto no se puede eliminar se elimina cuando se elimina la reserva
-    return `This action removes a #${id} boleto`;
+  async remove(id: number) {
+    const boleto = await this.boletoRepository.findOne({
+      where: { boleto_id: id },
+      relations: ['reservas', 'reservas.asiento']
+    });
+
+    if (!boleto) {
+      throw new NotFoundException(`Boleto con ID ${id} no encontrado`);
+    }
+
+    // Si hay dos reservas, solo eliminar los datos de la reserva cancelada
+    if (boleto.reservas && boleto.reservas.length > 1) {
+      const reservaCancelada = boleto.reservas.find(r => r.estado === EstadoReserva.CANCELADA);
+      if (reservaCancelada) {
+        // Actualizar el total y cantidad de asientos
+        boleto.total -= reservaCancelada.precio;
+        boleto.cantidad_asientos--;
+        
+        // Actualizar la lista de asientos
+        const asientosArray = boleto.asientos.split(',');
+        const asientoIndex = asientosArray.indexOf(reservaCancelada.asiento.numero_asiento.toString());
+        if (asientoIndex > -1) {
+          asientosArray.splice(asientoIndex, 1);
+        }
+        boleto.asientos = asientosArray.join(',');
+
+        // Generar nuevo QR con datos actualizados
+        const qrData = {
+          total: boleto.total,
+          cantidad_asientos: boleto.cantidad_asientos,
+          estado: boleto.estado,
+          asientos: boleto.asientos
+        };
+
+        const qrBuffer = await QRCode.toBuffer(JSON.stringify(qrData));
+        const uploadResult = await this.cloudinaryService.uploadBuffer(qrBuffer, 'boletos');
+        boleto.url_imagen_qr = uploadResult.secure_url;
+
+        return this.boletoRepository.save(boleto);
+      }
+    }
+
+    boleto.estado = EstadoBoleto.CANCELADO;
+
+    return this.boletoRepository.save(boleto);
   }
 }

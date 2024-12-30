@@ -21,6 +21,22 @@ export class MailService {
     }
   }
 
+  async sendReservation(email: string, reservationData: any) {
+    try {
+      await this.mailerService.sendMail({
+        to: email,
+        subject: 'Reserva realizada',
+        template: './reservation',
+        context: {
+          name: reservationData.name,
+          reservationId: reservationData.reservationId,
+        },
+      });
+    } catch (error) {
+      console.error('Error sending email:', error);
+    }
+  }
+
   async sendPaymentConfirmation(email: string, paymentData: any) {
     try {
       await this.mailerService.sendMail({

@@ -1,20 +1,20 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { Reserva } from './entities/reserva.entity';
 import { CreateReservaDto } from './dto/create-reserva.dto';
 import { UpdateReservaDto } from './dto/update-reserva.dto';
-import { Reserva } from './entities/reserva.entity';
 import { User } from '../user/entities/user.entity';
 import { Frecuencia } from '../frecuencias/entities/frecuencia.entity';
 import { Asiento } from '../asientos/entities/asiento.entity';
 import { Ruta } from '../rutas/entities/ruta.entity';
 import { Boleto } from '../boletos/entities/boleto.entity';
-import { Asientos } from '../common/enums/asientos.enum';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { MailService } from '../mail/mail.service';
 import { EstadoReserva, MetodoPago } from '../common/enums/reserva.enum';
 import { EstadoBoleto } from '../common/enums/boletos.enum';
-import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import * as QRCode from 'qrcode';
-import { MailService } from 'src/mail/mail.service';
+import { Asientos } from '../common/enums/asientos.enum';
 
 interface QRCodeData {
   total: number;
@@ -64,13 +64,25 @@ export class ReservaService {
       await this.actualizarBoleto(reservaGuardada.boleto_id);
     }
 
-    await this.mailService.sendReservationConfirmation(
-      usuario.correo,
-      {
-        name: reservaGuardada.nombre_pasajero,
-        reservationId: reservaGuardada.boleto_id
-      }
-    );
+    //Cuando el tipo de pago es presencial, se envia un correo de confirmacion
+    if (createReservaDto.metodo_pago === MetodoPago.PRESENCIAL) {
+      await this.mailService.sendReservationConfirmation(
+        usuario.correo,
+        {
+          name: reservaGuardada.nombre_pasajero,
+          reservationId: reservaGuardada.boleto_id
+        }
+      );
+    }
+    if(createReservaDto.metodo_pago === MetodoPago.DEPOSITO) {
+      await this.mailService.sendReservation(
+        usuario.correo,
+        {
+          name: reservaGuardada.nombre_pasajero,
+          reservationId: reservaGuardada.boleto_id
+        }
+      );
+    }
 
     return reservaGuardada;
   }
@@ -97,7 +109,7 @@ export class ReservaService {
   async findOne(id: number): Promise<Reserva> {
     const reserva = await this.reservaRepository.findOne({
       where: { reserva_id: id },
-      relations: ['boleto']
+      relations: ['asiento', 'boleto', 'boleto.reservas', 'boleto.reservas.asiento']
     });
 
     if (!reserva) {
@@ -116,7 +128,63 @@ export class ReservaService {
 
   async remove(id: number): Promise<Reserva> {
     const reserva = await this.findOne(id);
-    return this.reservaRepository.remove(reserva);
+    
+    if (!reserva) {
+      throw new NotFoundException(`Reserva con ID ${id} no encontrada`);
+    }
+
+    // Solo se puede cancelar si es depósito y no está confirmada
+    if (reserva.metodo_pago === MetodoPago.DEPOSITO && reserva.estado !== EstadoReserva.CONFIRMADA) {
+      reserva.estado = EstadoReserva.CANCELADA;
+      await this.reservaRepository.save(reserva);
+      
+      // Si tiene boleto asociado, actualizar el boleto
+      if (reserva.boleto_id) {
+        const boleto = await this.boletoRepository.findOne({
+          where: { boleto_id: reserva.boleto_id },
+          relations: ['reservas', 'reservas.asiento']
+        });
+
+        if (boleto) {
+          // Si hay más de una reserva, solo eliminar los datos de esta reserva
+          if (boleto.reservas && boleto.reservas.length > 1) {
+            // Actualizar el total y cantidad de asientos
+            boleto.total -= reserva.precio;
+            boleto.cantidad_asientos--;
+            
+            // Actualizar la lista de asientos
+            const asientosArray = boleto.asientos.split(',');
+            const asientoIndex = asientosArray.indexOf(reserva.asiento.numero_asiento.toString());
+            if (asientoIndex > -1) {
+              asientosArray.splice(asientoIndex, 1);
+            }
+            boleto.asientos = asientosArray.join(',');
+
+            // Generar nuevo QR con los datos actualizados
+            const qrData = {
+              total: boleto.total,
+              cantidad_asientos: boleto.cantidad_asientos,
+              estado: boleto.estado,
+              asientos: boleto.asientos
+            };
+
+            const qrBuffer = await QRCode.toBuffer(JSON.stringify(qrData));
+            const uploadResult = await this.cloudinaryService.uploadBuffer(qrBuffer, 'boletos');
+            boleto.url_imagen_qr = uploadResult.secure_url;
+
+            await this.boletoRepository.save(boleto);
+          } else {
+            // Si solo hay una reserva, marcar el boleto como cancelado
+            boleto.estado = EstadoBoleto.CANCELADO;
+            await this.boletoRepository.save(boleto);
+          }
+        }
+      }
+      
+      return reserva;
+    }
+
+    throw new ConflictException('Solo se pueden cancelar reservas con método de pago por depósito y que no estén confirmadas');
   }
 
   private async calcularPrecio(destinoReserva: string, frecuenciaId: number, asientoId: number): Promise<number> {
@@ -378,13 +446,23 @@ export class ReservaService {
     destinoReserva: string
   ): Promise<Boleto | null> {
     const reservaExistente = await this.reservaRepository.findOne({
-      where: {
-        usuario_id: usuarioId,
-        frecuencia_id: frecuenciaId,
-        fecha_viaje: fechaViaje,
-        destino_reserva: destinoReserva,
-        estado: EstadoReserva.CONFIRMADA,
-      },
+      where: [
+        {
+          usuario_id: usuarioId,
+          frecuencia_id: frecuenciaId,
+          fecha_viaje: fechaViaje,
+          destino_reserva: destinoReserva,
+          estado: EstadoReserva.CONFIRMADA,
+        },
+        {
+          usuario_id: usuarioId,
+          frecuencia_id: frecuenciaId,
+          fecha_viaje: fechaViaje,
+          destino_reserva: destinoReserva,
+          estado: EstadoReserva.PENDIENTE,
+          metodo_pago: MetodoPago.DEPOSITO,
+        }
+      ],
       relations: ['boleto'],
     });
 
