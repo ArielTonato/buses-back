@@ -18,9 +18,9 @@ POST http://localhost:3000/api/reserva
 Content-Type: application/json
 
 {
-    "usuario_id": 20,
+    "usuario_id": 41,
     "asiento_id": 92,
-    "frecuencia_id": 8,
+    "frecuencia_id": 12,
     "fecha_viaje": "2023-05-15",
     "destino_reserva": "Quito"
 }
