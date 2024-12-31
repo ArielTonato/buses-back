@@ -13,11 +13,11 @@ Content-Type: application/json
 
 {
     "usuario_id": 39,
-    "asiento_id": 95,
+    "asiento_id": 96,
     "frecuencia_id": 12,
     "fecha_viaje": "2023-05-15",
     "destino_reserva": "Quito",
-    "metodo_pago": "paypal"
+    "metodo_pago": "deposito"
 }
 
 ###Crear reserva 2
@@ -25,8 +25,8 @@ POST http://localhost:3000/api/reserva
 Content-Type: application/json
 
 {
-    "usuario_id": 41,
-    "asiento_id": 92,
+    "usuario_id": 39,
+    "asiento_id": 97,
     "frecuencia_id": 12,
     "fecha_viaje": "2023-05-15",
     "destino_reserva": "Quito",

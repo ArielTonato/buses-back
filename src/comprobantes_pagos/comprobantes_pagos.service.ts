@@ -12,6 +12,7 @@ import { EstadoComprobante } from '../common/enums/comprobantes.enum';
 import { EstadoReserva } from '../common/enums/reserva.enum';
 import { MailService } from '../mail/mail.service';
 import { Reserva } from 'src/reserva/entities/reserva.entity';
+import * as QRCode from 'qrcode';
 
 @Injectable()
 export class ComprobantesPagosService {
@@ -136,7 +137,7 @@ export class ComprobantesPagosService {
   private async actualizarEstadosBoletoReserva(boleto_id: number): Promise<void> {
     const boleto = await this.boletoRepository.findOne({
       where: { boleto_id },
-      relations: ['reservas']
+      relations: ['reservas', 'reservas.asiento']
     });
 
     if (!boleto) {
@@ -145,6 +146,28 @@ export class ComprobantesPagosService {
 
     // Actualizar estado del boleto
     boleto.estado = EstadoBoleto.PAGADO;
+
+    // Obtener los números de asientos
+    const numerosAsientos = boleto.reservas
+      .map(reserva => reserva.asiento.numero_asiento)
+      .sort((a, b) => a - b)
+      .join(',');
+
+    // Generar nuevo QR con estado actualizado
+    const qrData = {
+      total: boleto.reservas.reduce((sum, reserva) => sum + reserva.precio, 0),
+      cantidad_asientos: boleto.reservas.length,
+      estado: EstadoBoleto.PAGADO,
+      asientos: numerosAsientos,
+      mensaje: 'VÁLIDO - PAGO CONFIRMADO'
+    };
+
+    // Generar y subir nuevo QR
+    const qrBuffer = await QRCode.toBuffer(JSON.stringify(qrData));
+    const uploadResult = await this.cloudinaryService.uploadBuffer(qrBuffer, 'boletos');
+    
+    // Actualizar URL del QR
+    boleto.url_imagen_qr = uploadResult.secure_url;
     await this.boletoRepository.save(boleto);
 
     // Actualizar estado de las reservas y enviar correos
