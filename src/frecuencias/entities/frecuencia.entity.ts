@@ -50,6 +50,9 @@ export class Frecuencia {
   @Column('float')
   total: number;
 
+  @Column()
+  nro_aprobacion: string;
+
   //El es directo me va a indicar si la frecuencia va mostrar o no paradas intermedias
   @Column({default: false})
   es_directo: boolean;
