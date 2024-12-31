@@ -2,12 +2,18 @@
 GET http://localhost:3000/api/reserva
 
 ###Crear reserva 1
+###El estado puede ser pendiente, confirmada o cancelada
+###El metodo de pago puede ser presencial, deposito o paypal ()
+###El metodo de pago por defecto es presencial
+###Si es presencial, el estado por defecto es confirmada
+###Para el unico metodo que se debe redigir al usuario es el deposito
+### Donde se envia el comprobante de pago y un usuario lo confirma
 POST http://localhost:3000/api/reserva
 Content-Type: application/json
 
 {
     "usuario_id": 39,
-    "asiento_id": 91,
+    "asiento_id": 92,
     "frecuencia_id": 12,
     "fecha_viaje": "2023-05-15",
     "destino_reserva": "Quito",
@@ -20,19 +26,12 @@ Content-Type: application/json
 
 {
     "usuario_id": 41,
-    "asiento_id": 91,
+    "asiento_id": 92,
     "frecuencia_id": 12,
     "fecha_viaje": "2023-05-15",
     "destino_reserva": "Quito"
 }
 
-###Actualizar una reserva
-PUT http://localhost:3000/api/reserva/34
-Content-Type: application/json
-
-{
-    "estado": "confirmada"
-}
 
 ###Cancelar una reserva
-DELETE http://localhost:3000/api/reserva/65
+DELETE http://localhost:3000/api/reserva/67

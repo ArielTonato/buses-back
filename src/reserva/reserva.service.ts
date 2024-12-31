@@ -46,6 +46,12 @@ export class ReservaService {
   async create(createReservaDto: CreateReservaDto): Promise<Reserva> {
     await this.validateReservationCreation(createReservaDto);
 
+    // Cancelar reservas pendientes para el mismo asiento y fecha
+    await this.cancelarReservasPendientes(
+      createReservaDto.asiento_id,
+      new Date(createReservaDto.fecha_viaje)
+    );
+
     const [usuario, frecuencia] = await Promise.all([
       this.findUserById(createReservaDto.usuario_id),
       this.findFrecuenciaById(createReservaDto.frecuencia_id)
@@ -68,19 +74,7 @@ export class ReservaService {
     if (createReservaDto.metodo_pago === MetodoPago.PRESENCIAL) {
       await this.mailService.sendReservationConfirmation(
         usuario.correo,
-        {
-          name: reservaGuardada.nombre_pasajero,
-          reservationId: reservaGuardada.boleto_id
-        }
-      );
-    }
-    if(createReservaDto.metodo_pago === MetodoPago.DEPOSITO) {
-      await this.mailService.sendReservation(
-        usuario.correo,
-        {
-          name: reservaGuardada.nombre_pasajero,
-          reservationId: reservaGuardada.boleto_id
-        }
+        reservaGuardada
       );
     }
 
@@ -193,7 +187,24 @@ export class ReservaService {
     throw new ConflictException('Solo se pueden cancelar reservas con método de pago por depósito y que no estén confirmadas');
   }
 
-  private async calcularPrecio(destinoReserva: string, frecuenciaId: number, asientoId: number): Promise<number> {
+  async cancelarReservasPendientes(asientoId: number, fechaViaje: Date): Promise<void> {
+    // Buscar reservas pendientes para el mismo asiento y fecha
+    const reservasPendientes = await this.reservaRepository.find({
+      where: {
+        asiento_id: asientoId,
+        fecha_viaje: fechaViaje,
+        estado: EstadoReserva.PENDIENTE,
+        metodo_pago: MetodoPago.DEPOSITO
+      }
+    });
+
+    // Cancelar cada reserva pendiente usando el método remove
+    for (const reserva of reservasPendientes) {
+      await this.remove(reserva.reserva_id);
+    }
+  }
+
+  async calcularPrecio(destinoReserva: string, frecuenciaId: number, asientoId: number): Promise<number> {
     const [frecuencia, asiento] = await Promise.all([
       this.findFrecuenciaWithRutas(frecuenciaId),
       this.findAsientoById(asientoId)
@@ -203,7 +214,7 @@ export class ReservaService {
     return this.aplicarTarifaAsiento(precioBase, asiento.tipo_asiento);
   }
 
-  private async validateReservationCreation(createReservaDto: CreateReservaDto): Promise<void> {
+  async validateReservationCreation(createReservaDto: CreateReservaDto): Promise<void> {
     const [asientoConfirmado, reservaExistente] = await Promise.all([
       this.checkAsientoConfirmado(createReservaDto),
       this.checkReservaExistente(createReservaDto)
@@ -220,7 +231,7 @@ export class ReservaService {
     }
   }
 
-  private async createReservaEntity(
+  async createReservaEntity(
     dto: CreateReservaDto,
     usuario: User,
     frecuencia: Frecuencia,
@@ -249,7 +260,7 @@ export class ReservaService {
     return reserva;
   }
 
-  private async actualizarBoleto(boletoId: number): Promise<void> {
+  async actualizarBoleto(boletoId: number): Promise<void> {
     const boleto = await this.boletoRepository.findOne({
       where: { boleto_id: boletoId },
       relations: ['reservas']

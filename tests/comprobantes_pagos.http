@@ -9,7 +9,7 @@ Content-Type: application/json
 
 {
     "boleto_id": 12,
-    "usuario_id": 1,
+    "usuario_id": 39,
     "estado": "pendiente"
 }
 
