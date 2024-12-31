@@ -1,6 +1,10 @@
 ###Obtener todas las reservas
 GET http://localhost:3000/api/reserva
 
+
+###Obtener reserva por usuario
+GET http://localhost:3000/api/reserva/usuario/41
+
 ###Crear reserva 1
 ###El estado puede ser pendiente, confirmada o cancelada
 ###El metodo de pago puede ser presencial, deposito o paypal ()
@@ -12,12 +16,11 @@ POST http://localhost:3000/api/reserva
 Content-Type: application/json
 
 {
-    "usuario_id": 39,
-    "asiento_id": 96,
+    "usuario_id": 41,
+    "asiento_id": 99,
     "frecuencia_id": 12,
     "fecha_viaje": "2023-05-15",
-    "destino_reserva": "Quito",
-    "metodo_pago": "deposito"
+    "destino_reserva": "Latacunga"
 }
 
 ###Crear reserva 2
@@ -25,12 +28,11 @@ POST http://localhost:3000/api/reserva
 Content-Type: application/json
 
 {
-    "usuario_id": 39,
-    "asiento_id": 97,
+    "usuario_id": 41,
+    "asiento_id": 98,
     "frecuencia_id": 12,
     "fecha_viaje": "2023-05-15",
-    "destino_reserva": "Quito",
-    "metodo_pago": "deposito"
+    "destino_reserva": "Quito"
 }
 
 

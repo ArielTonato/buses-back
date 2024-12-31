@@ -26,12 +26,12 @@ GET http://localhost:3000/api/comprobantes-pagos/total
 
 ###Actualizar un comprobante de pago por ID
 ##Solo se de puede actualizar el estado y añadir comentarios
-PUT http://localhost:3000/api/comprobantes-pagos/7
+PUT http://localhost:3000/api/comprobantes-pagos/10
 Content-Type: application/json
 
 {
-    "estado": "aprobado",
-    "comentarios": "Comprobante aceptado"
+    "estado": "rechazado",
+    "comentarios": "La imagen no se puede leer"
 }
 
 ###Eliminar un comprobante de pago por ID

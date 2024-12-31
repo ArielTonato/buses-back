@@ -132,6 +132,19 @@ export class ReservaService {
     });
   }
 
+  async findAllByUserId(userId: number): Promise<Reserva[]> {
+    const user = await this.userRepository.findOne({ where: { usuario_id: userId } });
+    if (!user) {
+      throw new NotFoundException(`Usuario con ID ${userId} no encontrado`);
+    }
+
+    return this.reservaRepository.find({
+      where: { usuario_id: userId },
+      relations: ['usuario', 'frecuencia', 'asiento', 'boleto'],
+      order: { fecha_viaje: 'DESC' }
+    });
+  }
+
   async remove(id: number): Promise<Reserva> {
     const reserva = await this.findOne(id);
     
