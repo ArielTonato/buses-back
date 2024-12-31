@@ -17,9 +17,19 @@ export class BoletosController {
     return this.boletosService.findAll();
   }
 
+  @Get('usuario/:userId')
+  findAllByUserId(@Param('userId') userId: string) {
+    return this.boletosService.findAllByUserId(+userId);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.boletosService.findOne(+id);
+  }
+
+  @Get('reserva/:reservaId')
+  findByReservaId(@Param('reservaId') reservaId: string) {
+    return this.boletosService.findByReservaId(+reservaId);
   }
 
   @Patch(':id')
