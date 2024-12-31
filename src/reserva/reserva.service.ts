@@ -70,11 +70,23 @@ export class ReservaService {
       await this.actualizarBoleto(reservaGuardada.boleto_id);
     }
 
-    //Cuando el tipo de pago es presencial, se envia un correo de confirmacion
-    if (createReservaDto.metodo_pago === MetodoPago.PRESENCIAL) {
+    //Cuando el tipo de pago es presencial o paypal, se envia un correo de confirmacion
+    if (createReservaDto.metodo_pago === MetodoPago.PRESENCIAL || createReservaDto.metodo_pago === MetodoPago.PAYPAL) {
       await this.mailService.sendReservationConfirmation(
         usuario.correo,
-        reservaGuardada
+        {
+          name: `${usuario.primer_nombre} ${usuario.primer_apellido}`,
+          reservationId: reservaGuardada.reserva_id
+        }
+      );
+    }
+    if(createReservaDto.metodo_pago === MetodoPago.DEPOSITO) {
+      await this.mailService.sendReservation(
+        usuario.correo,
+        {
+          name: `${usuario.primer_nombre} ${usuario.primer_apellido}`,
+          reservationId: reservaGuardada.reserva_id
+        }
       );
     }
 
@@ -282,7 +294,7 @@ export class ReservaService {
   }
 
   private determinarEstadoInicial(metodoPago: MetodoPago, estado?: EstadoReserva): EstadoReserva {
-    if (metodoPago === MetodoPago.PRESENCIAL) {
+    if (metodoPago === MetodoPago.PRESENCIAL || metodoPago === MetodoPago.PAYPAL) {
       return EstadoReserva.CONFIRMADA;
     }
     if (metodoPago === MetodoPago.DEPOSITO) {
@@ -294,6 +306,7 @@ export class ReservaService {
   private shouldCreateBoletoForReserva(reserva: Reserva): boolean {
     return reserva.metodo_pago === MetodoPago.DEPOSITO || 
            reserva.metodo_pago === MetodoPago.PRESENCIAL || 
+           reserva.metodo_pago === MetodoPago.PAYPAL || 
            reserva.estado === EstadoReserva.CONFIRMADA;
   }
 
@@ -302,7 +315,10 @@ export class ReservaService {
   }
 
   private async generarQRData(boleto: Boleto, asientos: string, hayReservaPorDeposito: boolean): Promise<QRCodeData> {
-    const esPagoPresencial = boleto.reservas.some(reserva => reserva.metodo_pago === MetodoPago.PRESENCIAL);
+    const esPagoPresencial = boleto.reservas.some(reserva => 
+      reserva.metodo_pago === MetodoPago.PRESENCIAL || 
+      reserva.metodo_pago === MetodoPago.PAYPAL
+    );
 
     return {
       total: boleto.reservas.reduce((sum, reserva) => sum + reserva.precio, 0),
@@ -310,7 +326,7 @@ export class ReservaService {
       estado: hayReservaPorDeposito ? EstadoBoleto.PENDIENTE : EstadoBoleto.PAGADO,
       asientos,
       mensaje: hayReservaPorDeposito ? 'NO VÁLIDO - PENDIENTE DE PAGO' : 
-               esPagoPresencial ? 'VÁLIDO - PAGO PRESENCIAL' : undefined
+               esPagoPresencial ? 'VÁLIDO - PAGO PRESENCIAL/PAYPAL' : undefined
     };
   }
 
