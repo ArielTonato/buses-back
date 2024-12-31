@@ -10,6 +10,7 @@ import { Ruta } from '../rutas/entities/ruta.entity';
 import { Boleto } from '../boletos/entities/boleto.entity';
 import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 import { MailModule } from '../mail/mail.module';
+import { PdfGeneratorService } from '../utils/pdf-generator.service';
 
 @Module({
   imports: [
@@ -18,6 +19,9 @@ import { MailModule } from '../mail/mail.module';
     MailModule
   ],
   controllers: [ReservaController],
-  providers: [ReservaService]
+  providers: [
+    ReservaService,
+    PdfGeneratorService
+  ]
 })
 export class ReservaModule {}

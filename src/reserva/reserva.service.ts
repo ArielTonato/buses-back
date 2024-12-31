@@ -15,6 +15,7 @@ import { EstadoReserva, MetodoPago } from '../common/enums/reserva.enum';
 import { EstadoBoleto } from '../common/enums/boletos.enum';
 import * as QRCode from 'qrcode';
 import { Asientos } from '../common/enums/asientos.enum';
+import { PdfGeneratorService } from '../utils/pdf-generator.service';
 
 interface QRCodeData {
   total: number;
@@ -41,6 +42,7 @@ export class ReservaService {
     private readonly boletoRepository: Repository<Boleto>,
     private readonly cloudinaryService: CloudinaryService,
     private readonly mailService: MailService,
+    private readonly pdfGeneratorService: PdfGeneratorService,
   ) { }
 
   async create(createReservaDto: CreateReservaDto): Promise<Reserva> {
