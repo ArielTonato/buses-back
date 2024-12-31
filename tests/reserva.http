@@ -17,7 +17,7 @@ Content-Type: application/json
     "frecuencia_id": 12,
     "fecha_viaje": "2023-05-15",
     "destino_reserva": "Quito",
-    "metodo_pago": "deposito"
+    "metodo_pago": "paypal"
 }
 
 ###Crear reserva 2
@@ -29,7 +29,8 @@ Content-Type: application/json
     "asiento_id": 92,
     "frecuencia_id": 12,
     "fecha_viaje": "2023-05-15",
-    "destino_reserva": "Quito"
+    "destino_reserva": "Quito",
+    "metodo_pago": "deposito"
 }
 
 
