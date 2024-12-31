@@ -22,6 +22,16 @@ export class RutasController {
     return this.rutasService.findOne(id);
   }
 
+  @Get('frecuencia/:id')
+  findByFrecuencia(@Param('id') id: number) {
+    return this.rutasService.findByFrecuencia(id);
+  }
+
+  @Get('parada/:id')
+  findByParada(@Param('id') id: number) {
+    return this.rutasService.findByParada(id);
+  }
+
   @Put(':id')
   update(@Param('id') id: number, @Body() updateRutaDto: UpdateRutaDto) {
     return this.rutasService.update(id, updateRutaDto);

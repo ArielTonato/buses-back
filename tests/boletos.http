@@ -1,0 +1,6 @@
+
+###Obtener boletos
+GET http://localhost:3000/api/boletos
+
+###Obtener boleto por id
+GET http://localhost:3000/api/boletos/12

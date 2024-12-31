@@ -50,7 +50,7 @@ export const userSeed = async (dataSource: DataSource) => {
             segundo_nombre: 'Frecuencia',
             primer_apellido: 'Control',
             segundo_apellido: 'Rutas',
-            correo: 'aprobador@buses.com',
+            correo: 'atonato5734@uta.edu.ec',
             password: await bcrypt.hash('123456', 10),
             telefono: '0934567890',
             rol: Roles.USUARIOS_APROBADORES,
@@ -67,6 +67,18 @@ export const userSeed = async (dataSource: DataSource) => {
             telefono: '0945678901',
             rol: Roles.USUARIOS_NORMAL,
             direccion: 'Dirección Cliente'
+        },
+        {
+            identificacion: '9938776655',
+            primer_nombre: 'Correo',
+            segundo_nombre: 'Prueba',
+            primer_apellido: 'Gmail',
+            segundo_apellido: 'Regular',
+            correo: 'alexitotn21@gmail.com',
+            password: await bcrypt.hash('123456', 10),
+            telefono: '0935678901',
+            rol: Roles.USUARIOS_NORMAL,
+            direccion: 'Dirección UTA'
         }
     ];
 
