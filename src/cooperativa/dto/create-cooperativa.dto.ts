@@ -1,7 +1,9 @@
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, IsEmail } from 'class-validator';
+import { ValidarCadena } from 'src/common/decorators/cadenasTexto.decorator';
 
 export class CreateCooperativaDto {
     @IsString()
+    @ValidarCadena()
     @IsNotEmpty()
     nombre: string;
 
@@ -10,6 +12,7 @@ export class CreateCooperativaDto {
     telefono: string;
 
     @IsString()
+    @IsEmail()
     @IsNotEmpty()
     correo: string;
 
