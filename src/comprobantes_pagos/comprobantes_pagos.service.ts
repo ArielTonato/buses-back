@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { CreateComprobantesPagoDto } from './dto/create-comprobantes_pago.dto';
 import { UpdateComprobantesPagoDto } from './dto/update-comprobantes_pago.dto';
 import { ComprobantePago } from './entities/comprobantes_pago.entity';
@@ -7,6 +7,11 @@ import { Repository } from 'typeorm';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { User } from '../user/entities/user.entity';
 import { Boleto } from 'src/boletos/entities/boleto.entity';
+import { EstadoBoleto } from '../common/enums/boletos.enum';
+import { EstadoComprobante } from '../common/enums/comprobantes.enum';
+import { EstadoReserva } from '../common/enums/reserva.enum';
+import { MailService } from '../mail/mail.service';
+import { Reserva } from 'src/reserva/entities/reserva.entity';
 
 @Injectable()
 export class ComprobantesPagosService {
@@ -17,8 +22,41 @@ export class ComprobantesPagosService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(Boleto)
     private readonly boletoRepository: Repository<Boleto>,
+    @InjectRepository(Reserva)
+    private readonly reservaRepository: Repository<Reserva>,
     private readonly cloudinaryService: CloudinaryService,
+    private readonly mailService: MailService,
   ) {}
+
+  /**
+   * Verifica si el usuario y el boleto pertenecen a la misma reserva
+   * @param usuario_id ID del usuario
+   * @param boleto_id ID del boleto
+   */
+  private async verificarUsuarioBoletoReserva(usuario_id: number, boleto_id: number): Promise<boolean> {
+    const boleto = await this.boletoRepository.findOne({
+      where: { boleto_id },
+      relations: ['reservas', 'reservas.usuario']
+    });
+
+    if (!boleto) {
+      throw new NotFoundException(`No se encontró el boleto con ID ${boleto_id}`);
+    }
+
+    // Verificar que el boleto no esté cancelado
+    if (boleto.estado === EstadoBoleto.CANCELADO) {
+      throw new BadRequestException('No se puede crear un comprobante para un boleto cancelado');
+    }
+
+    // Verificar si alguna reserva del boleto pertenece al usuario
+    const reservaUsuario = boleto.reservas.some(reserva => reserva.usuario.usuario_id === usuario_id);
+    
+    if (!reservaUsuario) {
+      throw new BadRequestException('El usuario no tiene una reserva asociada a este boleto');
+    }
+
+    return true;
+  }
 
   /**
    * Crea un nuevo comprobante de pago.
@@ -37,6 +75,9 @@ export class ComprobantesPagosService {
     if (!boleto) {
       throw new NotFoundException(`No se encontró el boleto con ID ${createComprobantesPagoDto.boleto_id}`);
     }
+
+    // Verificar que el usuario y el boleto pertenezcan a la misma reserva
+    await this.verificarUsuarioBoletoReserva(createComprobantesPagoDto.usuario_id, createComprobantesPagoDto.boleto_id);
 
     const cloudinaryResponse = await this.cloudinaryService.upload(file);
     createComprobantesPagoDto.url_comprobante = cloudinaryResponse.secure_url;
@@ -89,6 +130,40 @@ export class ComprobantesPagosService {
   }
 
   /**
+   * Actualiza el estado del boleto y la reserva cuando se aprueba el comprobante
+   * @param boleto_id ID del boleto
+   */
+  private async actualizarEstadosBoletoReserva(boleto_id: number): Promise<void> {
+    const boleto = await this.boletoRepository.findOne({
+      where: { boleto_id },
+      relations: ['reservas']
+    });
+
+    if (!boleto) {
+      throw new NotFoundException(`No se encontró el boleto con ID ${boleto_id}`);
+    }
+
+    // Actualizar estado del boleto
+    boleto.estado = EstadoBoleto.PAGADO;
+    await this.boletoRepository.save(boleto);
+
+    // Actualizar estado de las reservas y enviar correos
+    for (const reserva of boleto.reservas) {
+      reserva.estado = EstadoReserva.CONFIRMADA;
+      await this.reservaRepository.save(reserva);
+
+      // Buscar el usuario para enviar el correo
+      const usuario = await this.userRepository.findOneBy({ usuario_id: reserva.usuario_id });
+      if (usuario) {
+        await this.mailService.sendReservationConfirmation(usuario.correo, {
+          name: `${usuario.primer_nombre} ${usuario.primer_apellido}`,
+          reservationId: reserva.reserva_id
+        });
+      }
+    }
+  }
+
+  /**
    * Actualiza un comprobante de pago.
    * @param id Identificador del comprobante.
    * @param updateComprobantesPagoDto Datos actualizados del comprobante (solo estado, comentarios y url_comprobante).
@@ -96,35 +171,35 @@ export class ComprobantesPagosService {
   async update(id: number, updateComprobantesPagoDto: UpdateComprobantesPagoDto) {
     const comprobante = await this.findOne(id);
     
-    // Solo actualizamos los campos permitidos que vengan en el DTO
-    const updatedFields: Partial<ComprobantePago> = {};
-    
-    if (updateComprobantesPagoDto.estado !== undefined) {
-      updatedFields.estado = updateComprobantesPagoDto.estado;
-      updatedFields.fecha_revision = new Date();
+    // Si el estado se está actualizando a APROBADO
+    if (updateComprobantesPagoDto.estado === EstadoComprobante.APROBADO) {
+      await this.actualizarEstadosBoletoReserva(comprobante.boleto_id);
     }
-    
-    if (updateComprobantesPagoDto.comentarios !== undefined) {
-      updatedFields.comentarios = updateComprobantesPagoDto.comentarios;
-    }
-    
-    if (updateComprobantesPagoDto.url_comprobante !== undefined) {
-      updatedFields.url_comprobante = updateComprobantesPagoDto.url_comprobante;
+    // Si el estado se está actualizando a RECHAZADO
+    else if (updateComprobantesPagoDto.estado === EstadoComprobante.RECHAZADO) {
+      const boleto = await this.boletoRepository.findOne({
+        where: { boleto_id: comprobante.boleto_id },
+        relations: ['reservas', 'reservas.usuario']
+      });
+
+      if (boleto && boleto.reservas) {
+        for (const reserva of boleto.reservas) {
+          const usuario = await this.userRepository.findOneBy({ usuario_id: reserva.usuario_id });
+          if (usuario) {
+            await this.mailService.sendPaymentRejected(usuario.correo, {
+              name: `${usuario.primer_nombre} ${usuario.primer_apellido}`,
+              reason: updateComprobantesPagoDto.comentarios,
+              reservationId: reserva.reserva_id,
+              ticketId: boleto.boleto_id
+            });
+          }
+        }
+      }
     }
 
-    if (Object.keys(updatedFields).length === 0) {
-      return {
-        message: 'No se proporcionaron campos válidos para actualizar',
-        comprobante
-      };
-    }
-
-    await this.comprobantePagoRepository.update(id, updatedFields);
-
-    return {
-      message: 'Comprobante de pago actualizado',
-      comprobante: await this.findOne(id)
-    };
+    // Actualizar el comprobante
+    Object.assign(comprobante, updateComprobantesPagoDto);
+    return this.comprobantePagoRepository.save(comprobante);
   }
 
   /**
@@ -136,7 +211,6 @@ export class ComprobantesPagosService {
     await this.comprobantePagoRepository.delete(id);
     return { message: 'Comprobante de pago eliminado correctamente' };
   }
-
 
   /** 
    * Obtiene todos los comprobantes de pago de un usuario.

@@ -100,4 +100,22 @@ export class MailService {
       },
     });
   }
+
+  async sendPaymentRejected(email: string, rejectionData: any) {
+    try {
+      await this.mailerService.sendMail({
+        to: email,
+        subject: 'Comprobante de Pago Rechazado',
+        template: './payment-rejected',
+        context: {
+          name: rejectionData.name,
+          reason: rejectionData.reason || 'No se proporcionó un motivo específico',
+          reservationId: rejectionData.reservationId,
+          ticketId: rejectionData.ticketId,
+        },
+      });
+    } catch (error) {
+      console.error('Error sending payment rejection email:', error);
+    }
+  }
 }

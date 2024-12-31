@@ -13,7 +13,7 @@ Content-Type: application/json
 
 {
     "usuario_id": 39,
-    "asiento_id": 92,
+    "asiento_id": 95,
     "frecuencia_id": 12,
     "fecha_viaje": "2023-05-15",
     "destino_reserva": "Quito",

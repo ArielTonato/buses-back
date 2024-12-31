@@ -16,7 +16,8 @@ export class CreateComprobantesPagoDto {
     url_comprobante?: string;
 
     @IsEnum(EstadoComprobante)
-    estado: EstadoComprobante;
+    @IsOptional()
+    estado?: EstadoComprobante = EstadoComprobante.PENDIENTE;
 
     @IsString()
     @IsOptional()   
