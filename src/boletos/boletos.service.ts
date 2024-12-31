@@ -48,6 +48,21 @@ export class BoletosService {
     return boletos;
   }
 
+  async findAllByUserId(userId: number) {
+    const boletos = await this.boletoRepository
+      .createQueryBuilder('boleto')
+      .innerJoinAndSelect('boleto.reservas', 'reserva')
+      .where('reserva.usuario_id = :userId', { userId })
+      .orderBy('boleto.fecha_emision', 'DESC')
+      .getMany();
+
+    if (!boletos.length) {
+      throw new NotFoundException(`No se encontraron boletos para el usuario con ID ${userId}`);
+    }
+
+    return boletos;
+  }
+
   async findOne(id: number) {
     const boleto = await this.boletoRepository.findOne({
       where: { boleto_id: id },
@@ -56,6 +71,20 @@ export class BoletosService {
     if(!boleto){
       throw new NotFoundException('No se encontro el boleto');
     }
+    return boleto;
+  }
+
+  async findByReservaId(reservaId: number) {
+    const boleto = await this.boletoRepository
+      .createQueryBuilder('boleto')
+      .innerJoinAndSelect('boleto.reservas', 'reserva')
+      .where('reserva.reserva_id = :reservaId', { reservaId })
+      .getOne();
+
+    if (!boleto) {
+      throw new NotFoundException(`No se encontró boleto para la reserva con ID ${reservaId}`);
+    }
+
     return boleto;
   }
 
