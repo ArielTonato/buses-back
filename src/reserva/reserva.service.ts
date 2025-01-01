@@ -15,6 +15,7 @@ import { EstadoReserva, MetodoPago } from '../common/enums/reserva.enum';
 import { EstadoBoleto } from '../common/enums/boletos.enum';
 import * as QRCode from 'qrcode';
 import { Asientos } from '../common/enums/asientos.enum';
+import { FacturaService } from '../factura/factura.service';
 
 interface QRCodeData {
   total: number;
@@ -41,6 +42,7 @@ export class ReservaService {
     private readonly boletoRepository: Repository<Boleto>,
     private readonly cloudinaryService: CloudinaryService,
     private readonly mailService: MailService,
+    private readonly facturaService: FacturaService,
   ) { }
 
   async create(createReservaDto: CreateReservaDto): Promise<Reserva> {
@@ -90,6 +92,8 @@ export class ReservaService {
       );
     }
 
+    await this.handleFacturaCreation(reservaGuardada);
+
     return reservaGuardada;
   }
 
@@ -108,6 +112,8 @@ export class ReservaService {
     if (reservaActualizada.boleto_id) {
       await this.actualizarBoleto(reservaActualizada.boleto_id);
     }
+
+    await this.actualizarFactura(reservaActualizada.boleto_id);
 
     return reservaActualizada;
   }
@@ -536,5 +542,49 @@ export class ReservaService {
     });
 
     return this.boletoRepository.save(boleto);
+  }
+
+  private async handleFacturaCreation(reserva: Reserva): Promise<void> {
+    // Si el método de pago no es PRESENCIAL o PAYPAL, no crear factura
+    if (reserva.metodo_pago !== MetodoPago.PRESENCIAL && reserva.metodo_pago !== MetodoPago.PAYPAL) {
+      return;
+    }
+
+    // Buscar si ya existe una factura para este boleto
+    const facturaExistente = await this.facturaService.findByReservaId(reserva.reserva_id);
+    
+    if (!facturaExistente) {
+      // Si no existe factura, crear una nueva
+      await this.facturaService.create({
+        boleto_id: reserva.boleto_id,
+        reservaId: reserva.reserva_id,
+        usuarioId: reserva.usuario_id,
+        cooperativaId: 1 // Valor fijo como especificado
+      });
+    }
+  }
+
+  private async actualizarFactura(boletoId: number): Promise<void> {
+    const boleto = await this.boletoRepository.findOne({
+      where: { boleto_id: boletoId },
+      relations: ['reservas']
+    });
+
+    if (!boleto) return;
+
+    // Buscar la factura asociada a cualquiera de las reservas del boleto
+    for (const reserva of boleto.reservas) {
+      const factura = await this.facturaService.findByReservaId(reserva.reserva_id);
+      if (factura) {
+        // Actualizar la factura con los nuevos datos del boleto
+        await this.facturaService.create({
+          boleto_id: boleto.boleto_id,
+          reservaId: reserva.reserva_id,
+          usuarioId: reserva.usuario_id,
+          cooperativaId: 1
+        });
+        break; // Solo necesitamos actualizar una vez
+      }
+    }
   }
 }

@@ -13,6 +13,7 @@ import { EstadoReserva } from '../common/enums/reserva.enum';
 import { MailService } from '../mail/mail.service';
 import { Reserva } from 'src/reserva/entities/reserva.entity';
 import * as QRCode from 'qrcode';
+import { FacturaService } from '../factura/factura.service';
 
 @Injectable()
 export class ComprobantesPagosService {
@@ -27,6 +28,7 @@ export class ComprobantesPagosService {
     private readonly reservaRepository: Repository<Reserva>,
     private readonly cloudinaryService: CloudinaryService,
     private readonly mailService: MailService,
+    private readonly facturaService: FacturaService,
   ) {}
 
   /**
@@ -170,7 +172,7 @@ export class ComprobantesPagosService {
     boleto.url_imagen_qr = uploadResult.secure_url;
     await this.boletoRepository.save(boleto);
 
-    // Actualizar estado de las reservas y enviar correos
+    // Actualizar estado de las reservas, generar factura y enviar correos
     for (const reserva of boleto.reservas) {
       reserva.estado = EstadoReserva.CONFIRMADA;
       await this.reservaRepository.save(reserva);
@@ -184,6 +186,15 @@ export class ComprobantesPagosService {
         });
       }
     }
+
+    // Generar factura con la primera reserva del boleto
+    const primeraReserva = boleto.reservas[0];
+    await this.facturaService.create({
+      boleto_id: boleto.boleto_id,
+      reservaId: primeraReserva.reserva_id,
+      usuarioId: primeraReserva.usuario_id,
+      cooperativaId: 1
+    });
   }
 
   /**

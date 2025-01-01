@@ -1,0 +1,5 @@
+GET http://localhost:3000/api/factura
+
+
+###Obtener facturas por usuario
+GET http://localhost:3000/api/factura/usuario/41

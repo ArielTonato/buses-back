@@ -1,5 +1,6 @@
 import { EstadoBoleto } from "src/common/enums/boletos.enum";
 import { ComprobantePago } from "src/comprobantes_pagos/entities/comprobantes_pago.entity";
+import { Factura } from "src/factura/entities/factura.entity";
 import { Reserva } from "src/reserva/entities/reserva.entity";
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
@@ -14,8 +15,6 @@ export class Boleto {
     @Column()
     cantidad_asientos: number
 
-
-
     @Column(
         {
             type: 'enum',
@@ -27,6 +26,9 @@ export class Boleto {
 
     @OneToMany(() => Reserva, reserva => reserva.boleto)
     reservas: Reserva[]
+
+    @OneToMany(() => Factura, factura => factura.boleto)
+    facturas: Factura[]
 
     @Column()
     url_imagen_qr: string

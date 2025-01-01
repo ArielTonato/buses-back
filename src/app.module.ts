@@ -14,6 +14,8 @@ import { ComprobantesPagosModule } from './comprobantes_pagos/comprobantes_pagos
 import { BoletosModule } from './boletos/boletos.module';
 import { ReservaModule } from './reserva/reserva.module';
 import { MailModule } from './mail/mail.module';
+import { CooperativaModule } from './cooperativa/cooperativa.module';
+import { FacturaModule } from './factura/factura.module';
 
 @Module({
   imports: [
@@ -45,7 +47,9 @@ import { MailModule } from './mail/mail.module';
     ComprobantesPagosModule,
     BoletosModule,
     ReservaModule,
-    MailModule
+    MailModule,
+    CooperativaModule,
+    FacturaModule
   ],
   controllers: [],
   providers: [],
