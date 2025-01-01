@@ -31,7 +31,8 @@ export class FacturaService {
     // Obtener todas las entidades necesarias con sus relaciones
     const [boleto, cooperativa, reserva, usuario] = await Promise.all([
       this.boletoRepository.findOne({
-        where: { boleto_id: createFacturaDto.boleto_id }
+        where: { boleto_id: createFacturaDto.boleto_id },
+        relations: ['reservas', 'reservas.frecuencia', 'reservas.frecuencia.bus']
       }),
       this.cooperativaRepository.findOne({
         where: { cooperativa_id: createFacturaDto.cooperativaId || 1 }
@@ -46,32 +47,32 @@ export class FacturaService {
     ]);
 
     // Validar que existan todas las entidades
-    if (!boleto) {
-      throw new NotFoundException(`Boleto con ID ${createFacturaDto.boleto_id} no encontrado`);
+    if (!boleto || !cooperativa || !reserva || !usuario) {
+      throw new NotFoundException('No se encontraron todas las entidades necesarias');
     }
-    if (!cooperativa) {
-      throw new NotFoundException(`Cooperativa con ID ${createFacturaDto.cooperativaId || 1} no encontrada`);
-    }
-    if (!reserva) {
-      throw new NotFoundException(`Reserva con ID ${createFacturaDto.reservaId} no encontrada`);
-    }
-    if (!usuario) {
-      throw new NotFoundException(`Usuario con ID ${createFacturaDto.usuarioId} no encontrado`);
+
+    // Buscar y eliminar facturas anteriores para este boleto
+    const facturasAnteriores = await this.facturaRepository.find({
+      where: { boleto_id: boleto.boleto_id }
+    });
+    
+    if (facturasAnteriores.length > 0) {
+      await this.facturaRepository.remove(facturasAnteriores);
     }
 
     // Generar número de factura único
     const numeroFactura = await this.generateFacturaNumber();
 
-    // Crear la factura con todas las relaciones
+    // Crear la nueva factura
     const factura = this.facturaRepository.create({
       numeroFactura,
       subtotal: boleto.total,
       iva: 0,
       total: boleto.total,
-      reserva: reserva,
-      usuario: usuario,
-      cooperativa: cooperativa,
-      boleto: boleto,
+      reserva,
+      usuario,
+      cooperativa,
+      boleto,
       reservaId: reserva.reserva_id,
       usuarioId: usuario.usuario_id,
       cooperativaId: cooperativa.cooperativa_id,
@@ -81,32 +82,13 @@ export class FacturaService {
     // Guardar la factura
     const facturaGuardada = await this.facturaRepository.save(factura);
 
-    // Generar PDF usando los datos correctos del boleto
-    const pdfBuffer = await this.pdfGeneratorService.generateTicket({
-      cooperativa: cooperativa.nombre,
-      direccion: cooperativa.direccion,
-      ruc: cooperativa.ruc,
-      fechaViaje: reserva.fecha_viaje.toISOString().split('T')[0],
-      horaViaje: reserva.frecuencia.hora_salida,
-      asientos: boleto.asientos, // Usar directamente los asientos del boleto
-      numeroAutobus: reserva.frecuencia.bus.numero_bus.toString(),
-      tipoPago: reserva.metodo_pago,
-      identificacionUsuario: usuario.identificacion,
-      nombreUsuario: reserva.nombre_pasajero,
-      destino: reserva.destino_reserva,
-      cantidad: boleto.cantidad_asientos, // Usar la cantidad de asientos del boleto
-      precioUnitario: boleto.total / boleto.cantidad_asientos, // Calcular el precio unitario correctamente
-    });
+    // Generar PDF con los datos actualizados del boleto
+    const pdfBuffer = await this.generatePdf(facturaGuardada);
+    const uploadResult = await this.cloudinaryService.uploadBuffer(pdfBuffer, 'facturas');
 
-    // Subir PDF a Cloudinary
-    const cloudinaryResponse = await this.cloudinaryService.uploadBuffer(
-      pdfBuffer,
-      'facturas'
-    );
-
-    // Actualizar factura con URL del PDF
+    // Actualizar la URL del PDF
     await this.facturaRepository.update(facturaGuardada.id, {
-      pdfUrl: cloudinaryResponse.secure_url,
+      pdfUrl: uploadResult.secure_url,
     });
 
     return this.facturaRepository.findOne({
@@ -116,16 +98,19 @@ export class FacturaService {
   }
 
   async findAll(): Promise<Factura[]> {
-    return this.facturaRepository.find();
+    return this.facturaRepository.find({
+      relations: ['reserva', 'usuario', 'cooperativa', 'boleto']
+    });
   }
 
   async findByUser(usuarioId: number): Promise<Factura[]> {
     return this.facturaRepository.find({
-      where: { usuarioId }
+      where: { usuarioId },
+      relations: ['reserva', 'usuario', 'cooperativa', 'boleto']
     });
   }
 
-  async findOne(id: string): Promise<Factura> {
+  async findOne(id: number): Promise<Factura> {
     const factura = await this.facturaRepository.findOne({
       where: { id },
       relations: [

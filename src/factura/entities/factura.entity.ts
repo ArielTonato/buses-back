@@ -6,8 +6,8 @@ import { Boleto } from '../../boletos/entities/boleto.entity';
 
 @Entity()
 export class Factura {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @Column({ unique: true })
   numeroFactura: string;
