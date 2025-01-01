@@ -26,7 +26,7 @@ GET http://localhost:3000/api/comprobantes-pagos/total
 
 ###Actualizar un comprobante de pago por ID
 ##Solo se de puede actualizar el estado y añadir comentarios
-PUT http://localhost:3000/api/comprobantes-pagos/11
+PUT http://localhost:3000/api/comprobantes-pagos/12
 Content-Type: application/json
 
 {
