@@ -1,19 +1,19 @@
-import { IsString, IsUUID, IsNumber, IsNotEmpty } from 'class-validator';
+import { IsString, IsUUID, IsNumber, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class CreateFacturaDto {
-  @IsString()
+  @IsNumber()
   @IsNotEmpty()
-  tipoPago: string;
+  reservaId: number;
 
-  @IsUUID()
+  @IsNumber()
   @IsNotEmpty()
-  reservaId: string;
+  usuarioId: number;
+  
+  @IsNumber()
+  @IsOptional()
+  cooperativaId?: number = 1;
 
-  @IsUUID()
+  @IsNumber()
   @IsNotEmpty()
-  usuarioId: string;
-
-  @IsUUID()
-  @IsNotEmpty()
-  cooperativaId: string;
+  boleto_id: number;
 }

@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, Jo
 import { Reserva } from '../../reserva/entities/reserva.entity';
 import { User } from '../../user/entities/user.entity';
 import { Cooperativa } from '../../cooperativa/entities/cooperativa.entity';
+import { Boleto } from '../../boletos/entities/boleto.entity';
 
 @Entity()
 export class Factura {
@@ -14,9 +15,6 @@ export class Factura {
   @CreateDateColumn()
   fechaEmision: Date;
 
-  @Column()
-  tipoPago: string;
-
   @Column('decimal', { precision: 10, scale: 2 })
   subtotal: number;
 
@@ -26,24 +24,34 @@ export class Factura {
   @Column('decimal', { precision: 10, scale: 2 })
   total: number;
 
+  @Column({ nullable: true })
+  pdfUrl: string;
+
   @ManyToOne(() => Reserva, { eager: true })
   @JoinColumn()
   reserva: Reserva;
 
   @Column()
-  reservaId: string;
+  reservaId: number;
 
   @ManyToOne(() => User, { eager: true })
   @JoinColumn()
   usuario: User;
 
   @Column()
-  usuarioId: string;
+  usuarioId: number;
 
   @ManyToOne(() => Cooperativa, { eager: true })
   @JoinColumn()
   cooperativa: Cooperativa;
 
+  @Column({ default: 1 })
+  cooperativaId: number;
+
+  @ManyToOne(() => Boleto, { eager: true })
+  @JoinColumn({ name: 'boleto_id' })
+  boleto: Boleto;
+
   @Column()
-  cooperativaId: string;
+  boleto_id: number;
 }
