@@ -119,15 +119,65 @@ export class RutasService {
   }
 
   findAll() {
-    return this.rutaRepository.find();
+    return this.rutaRepository.find({
+      relations: {
+        parada: true,
+        frecuencia: true,
+      },
+    });
   }
 
   async findOne(id: number) {
-    const ruta = await this.rutaRepository.findOneBy({ rutas_id: id });
+    const ruta = await this.rutaRepository.findOne({
+      where: { rutas_id: id },
+      relations: {
+        parada: true,
+        frecuencia: true,
+      },
+    });
     if (!ruta) {
       throw new NotFoundException(`La ruta con ID ${id} no existe`);
     }
     return ruta;
+  }
+
+  async findByFrecuencia(frecuenciaId: number) {
+    const rutas = await this.rutaRepository.find({
+      where: { frecuencia_id: frecuenciaId },
+      relations: {
+        parada: true,
+        frecuencia: true,
+      },
+      order: {
+        orden: 'ASC',
+      },
+    });
+
+    if (!rutas.length) {
+      throw new NotFoundException(`No se encontraron rutas para la frecuencia ${frecuenciaId}`);
+    }
+
+    return rutas;
+  }
+
+  async findByParada(paradaId: number) {
+    const rutas = await this.rutaRepository.find({
+      where: { parada_id: paradaId },
+      relations: {
+        parada: true,
+        frecuencia: true,
+      },
+      order: {
+        frecuencia_id: 'ASC',
+        orden: 'ASC',
+      },
+    });
+
+    if (!rutas.length) {
+      throw new NotFoundException(`No se encontraron rutas para la parada ${paradaId}`);
+    }
+
+    return rutas;
   }
 
   async update(id: number, updateRutaDto: UpdateRutaDto) {

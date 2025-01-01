@@ -35,6 +35,9 @@ export class CreateFrecuenciaDto {
     @IsNumber({}, {message: "El precio debe ser un número"})
     total: number
 
+    @IsString({message: "El número de aprobación debe ser una cadena"})
+    nro_aprobacion: string
+
     @IsBoolean({message: "El estado debe ser verdadero o falso"})
     @IsOptional()
     es_directo?: boolean

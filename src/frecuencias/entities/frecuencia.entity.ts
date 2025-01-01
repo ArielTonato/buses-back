@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, Jo
 import { Bus } from '../../buses/entities/bus.entity';
 import { User } from '../../user/entities/user.entity';
 import { Ruta } from '../../rutas/entities/ruta.entity';
+import { Reserva } from 'src/reserva/entities/reserva.entity';
 
 @Entity('frecuencias')
 export class Frecuencia {
@@ -25,6 +26,9 @@ export class Frecuencia {
   @JoinColumn({ name: 'conductor_id' })
   conductor: User;
 
+  @OneToMany(() => Reserva, reserva => reserva.frecuencia)
+  reservas: Reserva[]
+
   @Column('time')
   hora_salida: string;
 
@@ -45,6 +49,9 @@ export class Frecuencia {
 
   @Column('float')
   total: number;
+
+  @Column()
+  nro_aprobacion: string;
 
   //El es directo me va a indicar si la frecuencia va mostrar o no paradas intermedias
   @Column({default: false})

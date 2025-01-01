@@ -3,14 +3,14 @@ GET http://localhost:3000/api/frecuencias
 
 
 ###Obtener una frecuencia por ID
-GET http://localhost:3000/api/frecuencias/9
+GET http://localhost:3000/api/frecuencias/8
 
 
 ###Obtener frecuencias por conductor
 GET http://localhost:3000/api/frecuencias/conductor/18
 
 ###Obtener frecuencias por bus
-GET http://localhost:3000/api/frecuencias/bus/10
+GET http://localhost:3000/api/frecuencias/bus/14
 
 
 ###Obtener por canton (destino)
@@ -28,8 +28,8 @@ Content-Type: application/json
 
 {
     "nombre_frecuencia": "Ambato - Riobamba",
-    "bus_id": 10,
-    "conductor_id": 19,
+    "bus_id": 14,
+    "conductor_id": 38,
     "hora_salida": "18:30:00",
     "hora_llegada": "19:00:00",
     "origen": "Origen",
@@ -44,18 +44,13 @@ DELETE http://localhost:3000/api/frecuencias/7
 
 
 ###Actualizar
-PUT http://localhost:3000/api/frecuencias/9
+PUT http://localhost:3000/api/frecuencias/12
 Content-Type: application/json
 
 {
-    "nombre_frecuencia": "Frecuencia 1",
-    "bus_id": 14,
-    "conductor_id": 18,
-    "hora_salida": "18:30:00",
-    "hora_llegada": "19:00:00",
-    "origen": "  ambato  ",
-    "destino": "  rioBamba  ",
-    "provincia": "Provincia",
-    "es_directo": true,
-    "total": 10
+    "es_directo": false,
+    "origen": "Ambato",
+    "destino": "Quito",
+    "provincia": "Pichincha"
+
 }
