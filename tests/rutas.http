@@ -1,0 +1,43 @@
+###obtener todas las rutas
+GET http://localhost:3000/api/rutas
+
+
+###Obtener una ruta por el id
+GET http://localhost:3000/api/rutas/8
+
+###Obtener rutas por frecuencia
+GET http://localhost:3000/api/rutas/frecuencia/9
+
+###Obtener rutas por parada
+GET http://localhost:3000/api/rutas/parada/30
+
+###Crear una ruta
+POST http://localhost:3000/api/rutas
+Content-Type: application/json
+
+{
+    "frecuencia_id": 12,
+    "parada_id": 33,
+    "orden": 1,
+    "distancia_parada": 45,
+    "precio_parada": 1.2,
+    "tiempo_parada": "18:55:00"
+}
+
+
+###Actualizar una ruta
+PUT http://localhost:3000/api/rutas/9
+Content-Type: application/json
+
+{
+    "frecuencia_id": 8,
+    "parada_id": 29,
+    "orden": 1,
+    "distancia_parada": 45,
+    "precio_parada": 1.2,
+    "tiempo_parada": "18:30:00"
+}
+
+
+###Eliminar una ruta
+DELETE http://localhost:3000/api/rutas/8

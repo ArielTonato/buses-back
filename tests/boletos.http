@@ -1,0 +1,14 @@
+###Obtener boletos
+GET http://localhost:3000/api/boletos
+
+
+###Obtener boletos por usuario
+GET http://localhost:3000/api/boletos/usuario/39
+
+
+###Obtener boletos por reserva
+GET http://localhost:3000/api/boletos/reserva/91
+
+
+###Obtener boleto por id
+GET http://localhost:3000/api/boletos/12

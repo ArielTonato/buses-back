@@ -1,8 +1,8 @@
 import { 
     IsEmail, 
-    IsOptional, 
     IsPhoneNumber,  
     IsString, 
+    Matches, 
     MinLength 
 } from "class-validator";
 import { IsEcuadorianId } from "../../common/decorators/cedula.validator";
@@ -13,19 +13,23 @@ export class CreateUserDto {
     identificacion: string;
 
     @IsString()
+    @Matches(/^[a-zA-Z\s]+$/, { message: 'El primer nombre no puede contener números' })
     @MinLength(3, { message: "El primer nombre debe tener al menos 3 caracteres" })
     primer_nombre: string;
 
 
     @IsString()
+    @Matches(/^[a-zA-Z\s]+$/, { message: 'El segundo nombre no puede contener números' })
     @MinLength(3, { message: "El segundo nombre debe tener al menos 3 caracteres" })
     segundo_nombre: string;
 
     @IsString()
+    @Matches(/^[a-zA-Z\s]+$/, { message: 'El primer apellido no puede contener números' })
     @MinLength(3, { message: "El primer apellido debe tener al menos 3 caracteres" })
     primer_apellido: string;
 
     @IsString()
+    @Matches(/^[a-zA-Z\s]+$/, { message: 'El segundo apellido no puede contener números' })
     @MinLength(3, { message: "El segundo apellido debe tener al menos 3 caracteres" })
     segundo_apellido: string;
 

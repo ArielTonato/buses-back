@@ -4,25 +4,44 @@ Content-Type: application/json
 
 {
     "identificacion":"0504375734",
-    "primer_nombre":"Juan",
-    "segundo_nombre":"Carlos",
-    "primer_apellido":"Perez",
-    "segundo_apellido":"Gomez",
-    "correo":"adfasdf@gg.com",
+    "primer_nombre":"   aleX ",
+    "segundo_nombre":" aRiel",
+    "primer_apellido":"  tonato ",
+    "segundo_apellido":" GudiÑO",
+    "correo":"atonato5734@edu.com",
     "password":"123456",
     "telefono":"0988850126",
     "direccion":"Calle 123"
 }
 
-### Iniciar Sesion
+### Iniciar Sesion (administrador)
 POST http://localhost:3000/api/auth/login
 Content-Type: application/json
 
 {
-    "correo":"adfasdf@gg.com",
+    "correo":"cristina@edu.com",
+    "password":"123456"
+}
+
+### Iniciar Sesion (usuario buses)
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+    "correo":"bus@buses.com",
+    "password":"123456"
+}
+
+
+### Iniciar Sesion (usuario normal)
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+    "correo":"cliente@mail.com",
     "password":"123456"
 }
 
 ### Perfil
 GET http://localhost:3000/api/auth/profile
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb3JyZW8iOiJhZGZhc2RmQGdnLmNvbSIsInJvbCI6InVzdWFyaW9fbm9ybWFsIiwicHJpbWVyX25vbWJyZSI6Ikp1YW4iLCJwcmltZXJfYXBlbGxpZG8iOiJQZXJleiIsImlhdCI6MTczMjE0NDM1OSwiZXhwIjoxNzMyMjMwNzU5fQ._gtoamF9GVoos2NO1vcg0hwuOljt7T9NEuaKfYFoakg
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTgsImNvcnJlbyI6ImJ1c0BidXNlcy5jb20iLCJyb2wiOiJ1c3VhcmlvX2J1cyIsInByaW1lcl9ub21icmUiOiJVc3VhcmlvIiwicHJpbWVyX2FwZWxsaWRvIjoiR2VzdG9yIiwiaWF0IjoxNzMyNzQ5MzIxLCJleHAiOjE3MzI4MzU3MjF9.ZVWPvIgDZApGVdVzFzlt_4m_yLR4xkhUccoYUbxlLRU

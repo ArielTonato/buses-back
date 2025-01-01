@@ -1,6 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import { DataSource } from 'typeorm';
+import { runSeeds } from './common/seeds/seed';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -11,8 +13,14 @@ async function bootstrap() {
       whitelist: true,
       transform: true,
       forbidNonWhitelisted: true,
+      stopAtFirstError: true
     })
   )
+
+  // Run database seeds
+  const dataSource = app.get(DataSource);
+  await runSeeds(dataSource);
+
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

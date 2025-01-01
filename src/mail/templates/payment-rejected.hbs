@@ -1,0 +1,83 @@
+<html>
+  <head>
+    <title>Comprobante de Pago Rechazado</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .header {
+        background-color: #dc3545;
+        color: white;
+        padding: 20px;
+        text-align: center;
+        border-radius: 5px;
+      }
+      .content {
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 5px;
+        margin-top: 20px;
+      }
+      .footer {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 0.8em;
+        color: #666;
+      }
+      .warning {
+        background-color: #fff3cd;
+        border: 1px solid #ffeeba;
+        color: #856404;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 15px 0;
+      }
+      .action-required {
+        background-color: #e2e3e5;
+        border: 1px solid #d6d8db;
+        color: #383d41;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 15px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>Comprobante de Pago Rechazado</h1>
+    </div>
+    
+    <div class="content">
+      <h2>¡Hola {{name}}!</h2>
+      <p>Lamentamos informarte que tu comprobante de pago ha sido rechazado.</p>
+      
+      <div class="warning">
+        <p><strong>Motivo del rechazo:</strong> {{reason}}</p>
+      </div>
+
+      <div class="action-required">
+        <h3>Acciones requeridas:</h3>
+        <p>Por favor, sube un nuevo comprobante de pago teniendo en cuenta lo siguiente:</p>
+        <ul>
+          <li>Asegúrate de que el monto coincida con el valor del boleto</li>
+          <li>Verifica que la imagen sea clara y legible</li>
+          <li>Confirma que el comprobante corresponda a la transacción correcta</li>
+        </ul>
+      </div>
+
+      <p><strong>Número de reserva:</strong> {{reservationId}}</p>
+      <p><strong>Número de boleto:</strong> {{ticketId}}</p>
+      <p>Si necesitas ayuda adicional, no dudes en contactar con nuestro servicio de atención al cliente.</p>
+    </div>
+
+    <div class="footer">
+      <p>Este es un correo automático, por favor no responder.</p>
+      <p>&copy; 2024 Santa Clarita Transporte. Todos los derechos reservados.</p>
+    </div>
+  </body>
+</html>

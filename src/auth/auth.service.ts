@@ -30,10 +30,7 @@ export class AuthService {
     }
 
     async register(userRegister: RegisterDto){
-        const user = await this.userService.findOneByEmail(userRegister.correo);
-        if(user){
-            throw new BadRequestException('El usuario ya existe');
-        }
+        const user = await this.validateUser(userRegister);
 
         await this.userService.create({
             ...userRegister,
@@ -50,7 +47,6 @@ export class AuthService {
         {correo: email}: ActiveUserInterface
     ){
         const {usuario_id, rol, correo, primer_nombre, primer_apellido} = await this.userService.findOneByEmail(email);
-        console.log(correo)
         return {
             usuario_id,
             rol,
@@ -58,5 +54,22 @@ export class AuthService {
             primer_nombre,
             primer_apellido
         }
+    }
+
+
+    async validateUser(user: RegisterDto){
+        const userExists = await this.userService.findOneByEmail(user.correo);
+        if(userExists){
+            throw new BadRequestException('Ya existe un usuario con ese correo');
+        }
+        const userExistsPhone = await this.userService.findOneByCellPhone(user.telefono);
+        if(userExistsPhone){
+            throw new BadRequestException('Ya existe un usuario con ese número de teléfono');
+        }
+        const userExistsCedula = await this.userService.findOneByCedula(user.identificacion);
+        if(userExistsCedula){
+            throw new BadRequestException('Ya existe un usuario con esa cédula');
+        }
+        return user;
     }
 }

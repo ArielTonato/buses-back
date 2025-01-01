@@ -1,0 +1,39 @@
+
+###El estado puede ser pendiente, aceptado o rechazado por defecto es pendiente si no se especifica
+###Listar comprobantes de pago
+GET http://localhost:3000/api/comprobantes-pagos
+
+###Crear un comprobante de pago (debe probarse en postman para poder enviar una imagen) 
+POST http://localhost:3000/api/comprobantes-pagos
+Content-Type: application/json
+
+{
+    "boleto_id": 38,
+    "usuario_id": 39,
+    "estado": "pendiente"
+}
+
+###Obtener un comprobante de pago por ID
+GET http://localhost:3000/api/comprobantes-pagos/4
+
+
+###Obtener todos los comprobantes de pago de un usuario
+GET http://localhost:3000/api/comprobantes-pagos/user/17
+
+###Obtener la cantidad de comprobantes de pago en total
+GET http://localhost:3000/api/comprobantes-pagos/total
+
+
+###Actualizar un comprobante de pago por ID
+##Solo se de puede actualizar el estado y añadir comentarios
+PUT http://localhost:3000/api/comprobantes-pagos/12
+Content-Type: application/json
+
+{
+    "estado": "aprobado",
+    "comentarios": "Comprobante aprobado"
+}
+
+###Eliminar un comprobante de pago por ID
+###En teoria un comprobante no se puede eliminar pero por si acaso
+DELETE http://localhost:3000/api/comprobantes-pagos/2

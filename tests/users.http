@@ -1,0 +1,30 @@
+GET http://localhost:3000/api/user
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTEsImNvcnJlbyI6ImNyaXN0aW5hQGVkdS5jb20iLCJyb2wiOiJhZG1pbmlzdHJhZG9yIiwicHJpbWVyX25vbWJyZSI6IkNyaXN0aW5hIiwicHJpbWVyX2FwZWxsaWRvIjoiQ2hhY2hhIiwiaWF0IjoxNzMyNzQ5MDA1LCJleHAiOjE3MzI4MzU0MDV9.K8Djebb72HE-3FabybclPOQ6hwom4XTCuzKTRoN4BI0
+
+### Buscar Usuario por cedula
+GET http://localhost:3000/api/user/cedula/0504375734
+
+### Buscar Usuario por nombre
+GET http://localhost:3000/api/user/search/ma
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTAsImNvcnJlbyI6ImNyaXN0aW5hQGVkdS5jb20iLCJyb2wiOiJhZG1pbmlzdHJhZG9yIiwicHJpbWVyX25vbWJyZSI6IkNyaXN0aW5hIiwicHJpbWVyX2FwZWxsaWRvIjoiQ2hhY2hhIiwiaWF0IjoxNzMyNDA0MDQ5LCJleHAiOjE3MzI0OTA0NDl9.21YnC0ZYvATHzuxbkxwmdK5lcCwYDECJLWdix-dzGR4
+
+### Eliminar Usuario
+DELETE http://localhost:3000/api/user/10
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTAsImNvcnJlbyI6ImNyaXN0aW5hQGVkdS5jb20iLCJyb2wiOiJhZG1pbmlzdHJhZG9yIiwicHJpbWVyX25vbWJyZSI6IkNyaXN0aW5hIiwicHJpbWVyX2FwZWxsaWRvIjoiQ2hhY2hhIiwiaWF0IjoxNzMyNDA0MDQ5LCJleHAiOjE3MzI0OTA0NDl9.21YnC0ZYvATHzuxbkxwmdK5lcCwYDECJLWdix-dzGR4
+
+### Actualizar Usuario
+PUT http://localhost:3000/api/user/11
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTAsImNvcnJlbyI6ImNyaXN0aW5hQGVkdS5jb20iLCJyb2wiOiJhZG1pbmlzdHJhZG9yIiwicHJpbWVyX25vbWJyZSI6IkNyaXN0aW5hIiwicHJpbWVyX2FwZWxsaWRvIjoiQ2hhY2hhIiwiaWF0IjoxNzMyNDA0MDQ5LCJleHAiOjE3MzI0OTA0NDl9.21YnC0ZYvATHzuxbkxwmdK5lcCwYDECJLWdix-dzGR4
+
+  {
+    "identificacion": "1850509249",
+    "primer_nombre": "Cristina",
+    "segundo_nombre": "Estefania",
+    "primer_apellido": "Chacha",
+    "segundo_apellido": "Machado",
+    "correo": "cristina@edu.com",
+    "telefono": "0988508826",
+    "rol": "administrador",
+    "direccion": "Calle 123"
+  }
