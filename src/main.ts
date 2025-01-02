@@ -32,6 +32,6 @@ async function bootstrap() {
   const dataSource = app.get(DataSource);
   await runSeeds(dataSource);
 
-  await app.listen(process.env.PORT ?? 3001);
+  await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
