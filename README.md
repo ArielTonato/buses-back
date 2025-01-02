@@ -53,9 +53,9 @@ pnpm install
 
 
 3. Configura las variables de entorno:
-Crea un archivo .env en la raíz del proyecto con las siguientes variables:
-env
+Crea un archivo `.env` en la raíz del proyecto con las siguientes variables:
 
+```properties
 # Database Configuration
 MYSQL_HOST=localhost
 MYSQL_PORT=3306
@@ -76,9 +76,9 @@ MAIL_FROM=tu_email@gmail.com
 CLOUDINARY_CLOUD_NAME=tu_cloud_name
 CLOUDINARY_API_KEY=tu_api_key
 CLOUDINARY_API_SECRET=tu_api_secret
+```
 
-
-Asegúrate de reemplazar los valores con tus propias credenciales.
+> **Nota**: Asegúrate de reemplazar los valores con tus propias credenciales.
 
 4. Inicia el servidor de desarrollo:
 bash
