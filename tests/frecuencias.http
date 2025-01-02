@@ -28,14 +28,15 @@ Content-Type: application/json
 
 {
     "nombre_frecuencia": "Ambato - Riobamba",
-    "bus_id": 14,
-    "conductor_id": 38,
+    "bus_id": 2,
+    "conductor_id": 1,
     "hora_salida": "18:30:00",
     "hora_llegada": "19:00:00",
-    "origen": "Origen",
-    "destino": "Destino",
-    "provincia": "Provincia",
-    "total": 10
+    "origen": "Ambato",
+    "destino": "Riobamba", 
+    "provincia": "Chimborazo",
+    "total": 10,
+    "nro_aprobacion": "ANT-2024-001"
 }
 
 
