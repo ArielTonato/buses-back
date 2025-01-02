@@ -20,7 +20,8 @@ Content-Type: application/json
     "asiento_id": 99,
     "frecuencia_id": 12,
     "fecha_viaje": "2023-05-15",
-    "destino_reserva": "Latacunga"
+    "destino_reserva": "Quito",
+    "metodo_pago": "deposito"
 }
 
 ###Crear reserva 2
@@ -28,13 +29,14 @@ POST http://localhost:3000/api/reserva
 Content-Type: application/json
 
 {
-    "usuario_id": 39,
+    "usuario_id": 41,   
     "asiento_id": 100,
     "frecuencia_id": 12,
     "fecha_viaje": "2023-05-15",
-    "destino_reserva": "Quito"
+    "destino_reserva": "Quito",
+    "metodo_pago": "deposito"
 }
 
 
 ###Cancelar una reserva
-DELETE http://localhost:3000/api/reserva/67
+DELETE http://localhost:3000/api/reserva/113
