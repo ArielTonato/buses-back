@@ -85,23 +85,23 @@ bash
 pnpm run start:dev
 
 
-## Estructura del Proyecto modulos mas importantes
-
-
+## Estructura del Proyecto 
+```
 src/
+│
 ├── auth/             # Módulo de gestión de autenticación
 ├── boletos/          # Módulo de gestión de boletos
 ├── buses/            # Módulo de gestión de buses
-├── cloudinary/       # Módulo de gestión de para la carga de datos como imagenes y pdfs 
+├── cloudinary/       # Módulo de gestión para la carga de imágenes y PDFs
 ├── cooperativa/      # Módulo de configuración de la cooperativa
 ├── factura/          # Módulo de facturación
 ├── frecuencias/      # Módulo de gestión de frecuencias
 ├── reserva/          # Módulo de reservas
-├── mail/             # Módulo de envio de emails
+├── mail/             # Módulo de envío de emails
 ├── user/             # Módulo de usuarios
-├── app.module.ts     # Módulo principal de la aplicación
-└── common/           # Utilidades compartidas
-
+├── common/           # Utilidades compartidas
+└── app.module.ts     # Módulo principal de la aplicación
+```
 
 ## Documentación API 
 
