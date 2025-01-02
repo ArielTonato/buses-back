@@ -14,9 +14,9 @@ async function bootstrap() {
       whitelist: true,
       transform: true,
       forbidNonWhitelisted: true,
-      stopAtFirstError: true
-    })
-  )
+      stopAtFirstError: true,
+    }),
+  );
 
   // Configuración Swagger
   const config = new DocumentBuilder()
@@ -32,6 +32,6 @@ async function bootstrap() {
   const dataSource = app.get(DataSource);
   await runSeeds(dataSource);
 
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT ?? 3001);
 }
 bootstrap();
