@@ -163,9 +163,18 @@ Las pruebas se realizaron Rest Client y Postman, para ver los tests revisar la c
 
 * *Ariel Tonato* - Desarrollo - [ArielTonato](https://github.com/ArielTonato)
 
-## Licencia 
+## Licencia 📄
 
-Este proyecto está bajo la Licencia MIT - mira el archivo [LICENSE.md](LICENSE.md) para detalles
+Este proyecto es software libre y de código abierto, distribuido bajo la Licencia MIT. Esto significa que puedes:
+
+- ✔️ Usar el código para proyectos comerciales
+- ✔️ Modificar el código según tus necesidades
+- ✔️ Distribuir el código modificado
+- ✔️ Uso privado sin restricciones
+
+La única condición es mantener el aviso de copyright y la licencia en todas las copias o partes sustanciales del software.
+
+Para más detalles, consulta el archivo [LICENSE](LICENSE) en el repositorio.
 
 ## Agradecimientos 
 
